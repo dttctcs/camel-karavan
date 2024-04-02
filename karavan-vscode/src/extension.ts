@@ -177,7 +177,7 @@ export function activate(context: ExtensionContext) {
     //** DT CUSTOM COMMANDS BEGIN ******************************************** */
     const yamlToXML = commands.registerCommand("karavan.ytx", (...args: any[]) => {
         const file = args[1][0];
-        if (!file) window.showInformationMessage("No file selected!");
+        if (!file) return window.showInformationMessage("No file selected!");
         const yaml_content = fs.readFileSync(file.path, "utf8");
         try {
             const yaml_obj = YAML.parse(yaml_content);
