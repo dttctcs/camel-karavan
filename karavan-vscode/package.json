@@ -542,6 +542,11 @@
       {
         "command": "karavan.reportIssue",
         "title": "Report Issue"
+      },
+      {
+        "command": "karavan.ytx",
+        "title": "Karavan: Yaml to XML",
+        "icon": "$(wand)"
       }
     ],
     "menus": {
@@ -595,6 +600,11 @@
           "command": "karavan.generate-rest",
           "when": "resourceExtname == .json || resourceExtname == .yaml",
           "group": "karavan@9"
+        },
+        {
+          "command": "karavan.ytx",
+          "when": "resourceFilename =~ /.yaml$/",
+          "group": "karavan@10"
         }
       ],
       "editor/title": [
@@ -756,6 +766,7 @@
     "rxjs": "7.8.1",
     "shelljs": "^0.8.5",
     "uuid": "9.0.1",
+    "yaml": "^2.4.1",
     "zustand": "4.5.0"
   },
   "devDependencies": {
