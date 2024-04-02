@@ -181,8 +181,6 @@ export function activate(context: ExtensionContext) {
         const yaml_content = fs.readFileSync(file.path, "utf8");
         try {
             const yaml_obj = YAML.parse(yaml_content);
-            // console.log(yaml_obj.configMapGenerator)
-            // console.log(utils.yamlObjToXML(yaml_obj));
             const xmlString = utils.yamlObjToXML(yaml_obj);
             const pathArr = args[0].path.split("\/") as string[];
             const fName = pathArr.at(-1)?.split('.')[0] ?? Date.now().toString(16);
