@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Badge,
     Button,
@@ -26,23 +26,24 @@ import {
     TabTitleText,
 } from '@patternfly/react-core';
 import './karavan.css';
-import {RouteDesigner} from "./route/RouteDesigner";
-import {CamelDefinitionYaml} from "karavan-core/lib/api/CamelDefinitionYaml";
-import {Integration, IntegrationFile} from "karavan-core/lib/model/IntegrationDefinition";
-import {CamelUtil} from "karavan-core/lib/api/CamelUtil";
-import {CamelUi} from "./utils/CamelUi";
-import {useDesignerStore, useIntegrationStore} from "./DesignerStore";
-import {shallow} from "zustand/shallow";
-import {getDesignerIcon} from "./icons/KaravanIcons";
-import {InfrastructureAPI} from "./utils/InfrastructureAPI";
-import {EventBus, IntegrationUpdate} from "./utils/EventBus";
-import {RestDesigner} from "./rest/RestDesigner";
-import {BeansDesigner} from "./beans/BeansDesigner";
-import {CodeEditor} from "./editor/CodeEditor";
+import { RouteDesigner } from "./route/RouteDesigner";
+import { CamelDefinitionYaml } from "karavan-core/lib/api/CamelDefinitionYaml";
+import { Integration, IntegrationFile } from "karavan-core/lib/model/IntegrationDefinition";
+import { CamelUtil } from "karavan-core/lib/api/CamelUtil";
+import { CamelUi } from "./utils/CamelUi";
+import { useDesignerStore, useIntegrationStore } from "./DesignerStore";
+import { shallow } from "zustand/shallow";
+import { getDesignerIcon } from "./icons/KaravanIcons";
+import { InfrastructureAPI } from "./utils/InfrastructureAPI";
+import { EventBus, IntegrationUpdate } from "./utils/EventBus";
+import { RestDesigner } from "./rest/RestDesigner";
+import { BeansDesigner } from "./beans/BeansDesigner";
+import { CodeEditor } from "./editor/CodeEditor";
 import BellIcon from '@patternfly/react-icons/dist/esm/icons/bell-icon';
-import {KameletDesigner} from "./kamelet/KameletDesigner";
-import {RegistryBeanDefinition} from "karavan-core/lib/model/CamelDefinition";
-import {VariableUtil} from "karavan-core/lib/api/VariableUtil";
+import { KameletDesigner } from "./kamelet/KameletDesigner";
+import { RegistryBeanDefinition } from "karavan-core/lib/model/CamelDefinition";
+import { VariableUtil } from "karavan-core/lib/api/VariableUtil";
+import { RefsDesigner } from './refs/RefsDesigner';
 
 interface Props {
     onSave: (filename: string, yaml: string, propertyOnly: boolean) => void
@@ -65,7 +66,7 @@ export function KaravanDesigner(props: Props) {
     const [tab, setTab] = useState<string>('routes');
     const [setDark, setSelectedStep, reset, badge, message, setPropertyPlaceholders, setBeans] =
         useDesignerStore((s) =>
-        [s.setDark, s.setSelectedStep, s.reset, s.notificationBadge, s.notificationMessage, s.setPropertyPlaceholders, s.setBeans], shallow)
+            [s.setDark, s.setSelectedStep, s.reset, s.notificationBadge, s.notificationMessage, s.setPropertyPlaceholders, s.setBeans], shallow)
     const [integration, setIntegration, resetFiles, setVariables] = useIntegrationStore((s) =>
         [s.integration, s.setIntegration, s.resetFiles, s.setVariables], shallow)
 
@@ -136,17 +137,17 @@ export function KaravanDesigner(props: Props) {
         const counts = CamelUi.getFlowCounts(integration);
         const count = counts.has(icon) && counts.get(icon) ? counts.get(icon) : undefined;
         const showCount = count && count > 0;
-        const color= showBadge && badge ? "red" : "initial";
+        const color = showBadge && badge ? "red" : "initial";
         return (
-            <div className="top-menu-item" style={{color: color}}>
+            <div className="top-menu-item" style={{ color: color }}>
                 <TabTitleIcon>{getDesignerIcon(icon)}</TabTitleIcon>
                 <TabTitleText>{title}</TabTitleText>
                 {showCount && <Badge isRead className="count">{counts.get(icon)}</Badge>}
                 {showBadge && badge &&
                     <Button variant="link"
-                         icon={<BellIcon color="red"/>}
-                         style={{visibility: (badge ? 'visible' : 'hidden'), padding: '0', margin: '0'}}
-                         onClick={event => EventBus.sendAlert(message[0], message[1], 'danger')}/>
+                        icon={<BellIcon color="red" />}
+                        style={{ visibility: (badge ? 'visible' : 'hidden'), padding: '0', margin: '0' }}
+                        onClick={event => EventBus.sendAlert(message[0], message[1], 'danger')} />
                 }
             </div>
         )
@@ -156,28 +157,30 @@ export function KaravanDesigner(props: Props) {
 
     return (
         <PageSection variant={props.dark ? PageSectionVariants.darker : PageSectionVariants.light}
-                     className="page"
-                     isFilled padding={{default: 'noPadding'}}>
+            className="page"
+            isFilled padding={{ default: 'noPadding' }}>
             <div className={"main-tabs-wrapper"}>
                 <Tabs className="main-tabs"
-                      activeKey={tab}
-                      onSelect={(event, tabIndex) => {
-                          setTab(tabIndex.toString());
-                          setSelectedStep(undefined);
-                      }}
-                      style={{width: "100%"}}>
+                    activeKey={tab}
+                    onSelect={(event, tabIndex) => {
+                        setTab(tabIndex.toString());
+                        setSelectedStep(undefined);
+                    }}
+                    style={{ width: "100%" }}>
                     {isKamelet && <Tab eventKey='kamelet' title={getTab("Definitions", "Kamelet Definitions", "kamelet")}></Tab>}
                     <Tab eventKey='routes' title={getTab("Routes", "Integration flows", "routes")}></Tab>
                     {!isKamelet && <Tab eventKey='rest' title={getTab("REST", "REST services", "rest")}></Tab>}
                     <Tab eventKey='beans' title={getTab("Beans", "Beans Configuration", "beans")}></Tab>
+                    <Tab eventKey='refs' title={getTab("Refs", "Refs for XML", "refs")}></Tab>
                     {props.showCodeTab && <Tab eventKey='code' title={getTab("YAML", "YAML Code", "code", true)}></Tab>}
                 </Tabs>
             </div>
-            {tab === 'kamelet' && <KameletDesigner/>}
-            {tab === 'routes' && <RouteDesigner/>}
-            {tab === 'rest' && <RestDesigner/>}
-            {tab === 'beans' && <BeansDesigner/>}
-            {tab === 'code' && <CodeEditor/>}
+            {tab === 'kamelet' && <KameletDesigner />}
+            {tab === 'routes' && <RouteDesigner />}
+            {tab === 'rest' && <RestDesigner />}
+            {tab === 'beans' && <BeansDesigner />}
+            {tab === 'code' && <CodeEditor />}
+            {tab === 'refs' && <RefsDesigner />}
         </PageSection>
     )
 }
