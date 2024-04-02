@@ -54,8 +54,8 @@ export function saveBlockList(key: string, value: string) {
         const uriFolder: Uri = workspace.workspaceFolders[0].uri;
         const blockingComponentsPath: string | undefined = workspace.getConfiguration().get("Karavan.blockingComponentsPath");
         if (blockingComponentsPath && blockingComponentsPath.trim().length > 0) {
-            const name = key+"s-blocklist.txt";
-            write(path.join(uriFolder.path, blockingComponentsPath+"/"+name), value);
+            const name = key + "s-blocklist.txt";
+            write(path.join(uriFolder.path, blockingComponentsPath + "/" + name), value);
         } else {
             window.showErrorMessage("Settings path not configured!")
         }
@@ -78,7 +78,7 @@ export function getRalativePath(fullPath: string): string {
 }
 
 export async function readKamelets(context: ExtensionContext) {
-   const yamls: string[] = await readBuildInKamelets(context);
+    const yamls: string[] = await readBuildInKamelets(context);
     const kameletsPath: string | undefined = workspace.getConfiguration().get("Karavan.kameletsPath");
     if (kameletsPath && kameletsPath.trim().length > 0) {
         const kameletsDir = path.isAbsolute(kameletsPath) ? kameletsPath : path.resolve(kameletsPath);
@@ -152,7 +152,7 @@ export async function readPropertyPlaceholders(context: ExtensionContext) {
     return result;
 }
 
-function getBeans (integration: Integration): RegistryBeanDefinition[] {
+function getBeans(integration: Integration): RegistryBeanDefinition[] {
     const result: RegistryBeanDefinition[] = [];
     const beans = integration.spec.flows?.filter((e: any) => e.dslName === 'Beans');
     if (beans && beans.length > 0 && beans[0].beans) {
@@ -199,8 +199,8 @@ export async function readBlockTemplates(context: ExtensionContext) {
     if (blockedListDir && blockedListDir.trim().length > 0) {
         const files = await readFilesInDirByExtension(blockedListDir, "txt");
         files.forEach((v, k) => {
-                    result.set(k,v);
-            })
+            result.set(k, v);
+        })
     }
     return result;
 }
@@ -498,7 +498,7 @@ export async function getFileWithIntegnalConsumer(fullPath: string, uri: string,
     try {
         const integrations = await getIntegrations(path.dirname(fullPath));
         const route = TopologyUtils.findTopologyRouteNodes(integrations)
-                .filter(t => t?.from?.uri === uri && t?.from?.parameters?.name === name).at(0);
+            .filter(t => t?.from?.uri === uri && t?.from?.parameters?.name === name).at(0);
         if (route) {
             return path.join(path.dirname(fullPath), route.fileName);
         }
@@ -513,7 +513,7 @@ export async function getFileWithInternalProducer(fullPath: string, routeId: str
     try {
         const integrations = await getIntegrations(path.dirname(fullPath))
         const route = TopologyUtils.findTopologyOutgoingNodes(integrations)
-                .filter(t => t.routeId === routeId).at(0);
+            .filter(t => t.routeId === routeId).at(0);
         if (route) {
             return path.join(path.dirname(fullPath), route.fileName);
         }
@@ -522,4 +522,53 @@ export async function getFileWithInternalProducer(fullPath: string, routeId: str
         console.log((e as Error).message);
     }
     return undefined;
+}
+
+//**** Custom DT utils  ************* */
+
+
+type YamlLeaf = Map<string, string | YamlLeaf | YamlLeaf[]>
+export function yamlObjToXML(yaml: YamlLeaf) {
+    let xmlStr = "";
+    for (let key in yaml) {
+        //todo bring the <key></key> to the beginning and end of the for loop
+        const val = yaml[key];
+        if (typeof val === 'string' || typeof val === 'number')
+            xmlStr += `<${key}>${val}</${key}>\n`;
+        if (Array.isArray(val)) {
+            xmlStr += `<${key}>${_handleArr(val, key)}</${key}>\n`
+        } else if (typeof val === 'object') {
+            xmlStr += `<${key}>${_handleObject(val)}</${key}>\n`;
+        }
+    }
+    return xmlStr;
+}
+
+function _handleArr(arr: (string | Map<string, string>)[], key: string): string {
+    let str = "";
+    let childTagName = key.at(-1) === 's' ? key.substring(0, key.length - 1) : 'String';
+    arr.forEach(item => {
+        if (typeof item === 'string' || typeof item === 'number') str += `<${childTagName}>${item}</${childTagName}>\n`;
+        if (typeof item === 'object') {
+            for (let ok in item) {
+                if (Array.isArray(item[ok])) str += `<${ok}>${_handleArr(item[ok], ok)}</${ok}>`
+                else if (typeof item[ok] === 'object') str += `<${ok}>${_handleObject(item[ok])}</${ok}>`
+                else
+                    str += `<${ok}>${item[ok]}</${ok}>\n`
+            }
+        }
+    })
+    return str;
+}
+
+function _handleObject(obj: YamlLeaf): string {
+    let str = "";
+    for (let ok in obj) {
+        const val = obj[ok];
+        if (typeof val === 'string' || typeof val === 'number')
+            str += `<${ok}>${val}</${ok}>\n`
+        else if (typeof val === 'object')
+            str += _handleObject(val);
+    }
+    return str;
 }

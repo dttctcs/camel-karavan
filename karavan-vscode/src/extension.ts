@@ -20,10 +20,12 @@ import { IntegrationView } from "./integrationView";
 import { HelpView } from "./helpView";
 import { selectFileName, inputFileName, OpenApiView, OpenApiItem } from "./openapiView";
 import * as path from "path";
+import * as fs from "fs";
 import * as jbang from "./jbang";
 import * as utils from "./utils";
 import * as exec from "./exec";
 import { TopologyView } from './topologyView';
+import YAML from 'yaml';
 
 const KARAVAN_LOADED = "karavan:loaded";
 
@@ -102,10 +104,10 @@ export function activate(context: ExtensionContext) {
                     { label: "Replace", picked: false },
                     { label: "Cancel", picked: true }
                 ];
-                const replace = await window.showQuickPick(replaceOptions, {title: "Application already exists!", canPickMany: false });
+                const replace = await window.showQuickPick(replaceOptions, { title: "Application already exists!", canPickMany: false });
                 createApp = replace?.label === replaceOptions.at(0)?.label;
             }
-            if (createApp){
+            if (createApp) {
                 window.showQuickPick(runtimeOptions, { title: "Select Runtime", canPickMany: false }).then((runtime) => {
                     window.showQuickPick(deployOptions, { title: "Select Deploy Target", canPickMany: false }).then((target) => {
                         if (runtime && target) utils.createApplication(runtime.label, target.label)
@@ -130,20 +132,20 @@ export function activate(context: ExtensionContext) {
 
     // Run project with jbang
     const runJbang = commands.registerCommand("karavan.run-project-jbang", (...args: any[]) => {
-        jbang.camelJbangRun();        
+        jbang.camelJbangRun();
     });
     context.subscriptions.push(runJbang);
 
     // Run project with runtime
     const runRuntime = commands.registerCommand("karavan.run-project-runtime", (...args: any[]) => {
         utils.getProperties(rootPath).then(properties => {
-            if (properties.length > 0){
+            if (properties.length > 0) {
                 exportAndRunProject(rootPath, true);
             } else {
                 window.showErrorMessage("No runtime configured! Create application!")
             }
         })
-        
+
     });
     context.subscriptions.push(runRuntime);
 
@@ -170,6 +172,30 @@ export function activate(context: ExtensionContext) {
     commands.registerCommand('karavan.reportIssue', () => {
         commands.executeCommand('open', Uri.parse('https://github.com/apache/camel-karavan/issues/new?title=[VS+Code]New+report&template=issue_template.md'));
     });
+
+
+    //** DT CUSTOM COMMANDS BEGIN ******************************************** */
+    const yamlToXML = commands.registerCommand("karavan.ytx", (...args: any[]) => {
+        const file = args[1][0];
+        if (!file) window.showInformationMessage("No file selected!");
+        const yaml_content = fs.readFileSync(file.path, "utf8");
+        try {
+            const yaml_obj = YAML.parse(yaml_content);
+            // console.log(yaml_obj.configMapGenerator)
+            // console.log(utils.yamlObjToXML(yaml_obj));
+            const xmlString = utils.yamlObjToXML(yaml_obj);
+            const pathArr = args[0].path.split("\/") as string[];
+            const fName = pathArr.at(-1)?.split('.')[0] ?? Date.now().toString(16);
+            const dir = pathArr.slice(0, -1).join('/');
+            fs.writeFileSync(`${dir}/${fName}.xml`, xmlString, { flag: 'w+' });
+        } catch (error) {
+            window.showInformationMessage("Error: failed to parse yaml file.");
+            console.error(error);
+        }
+    });
+    context.subscriptions.push(yamlToXML);
+
+
 }
 
 /**
@@ -178,7 +204,7 @@ export function activate(context: ExtensionContext) {
 export async function exportAndRunProject(rootPath?: string, run?: boolean) {
     utils.getExportFolder()
         .then(folder => {
-            if (folder){
+            if (folder) {
                 const fullPath = rootPath + path.sep + folder;
                 exec.runWithRuntime(fullPath, run);
             } else {
