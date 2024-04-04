@@ -527,20 +527,22 @@ export async function getFileWithInternalProducer(fullPath: string, routeId: str
 //**** Custom DT utils  ************* */
 
 
-type YamlLeaf = Map<string, string | YamlLeaf | YamlLeaf[]>
+type YamlLeaf = Map<string, string | YamlLeaf | YamlLeaf[]> | YamlLeaf[];
 export function yamlObjToXML(yaml: YamlLeaf) {
     let xmlStr = "";
-    for (let key in yaml) {
-        //todo bring the <key></key> to the beginning and end of the for loop
-        const val = yaml[key];
-        if (typeof val === 'string' || typeof val === 'number')
-            xmlStr += `<${key}>${val}</${key}>\n`;
-        if (Array.isArray(val)) {
-            xmlStr += `<${key}>${_handleArr(val, key)}</${key}>\n`
-        } else if (typeof val === 'object') {
-            xmlStr += `<${key}>${_handleObject(val)}</${key}>\n`;
+    if (Array.isArray(yaml)) xmlStr += yaml.map(y => yamlObjToXML(y)).join('');
+    else
+        for (let key in yaml) {
+            //todo bring the <key></key> to the beginning and end of the for loop
+            const val = yaml[key];
+            if (typeof val === 'string' || typeof val === 'number')
+                xmlStr += `<${key}>${val}</${key}>\n`;
+            if (Array.isArray(val)) {
+                xmlStr += `<${key}>${_handleArr(val, key)}</${key}>\n`
+            } else if (typeof val === 'object') {
+                xmlStr += `<${key}>${_handleObject(val)}</${key}>\n`;
+            }
         }
-    }
     return xmlStr;
 }
 
@@ -568,7 +570,32 @@ function _handleObject(obj: YamlLeaf): string {
         if (typeof val === 'string' || typeof val === 'number')
             str += `<${ok}>${val}</${ok}>\n`
         else if (typeof val === 'object')
-            str += _handleObject(val);
+            str += `<${ok}>${_handleObject(val)}</${ok}>`
     }
     return str;
+}
+
+
+export function convertXmlNodeToYaml(node, indentLevel = 0) {
+    let yamlString = '';
+
+    const indent = '  '.repeat(indentLevel); // Two spaces for each level of indentation
+
+    if (node.type === 'element') {
+        yamlString += `${indent}${node.name}:\n`;
+        if (node.attributes) {
+            for (const attr in node.attributes) {
+                yamlString += `${indent}  ${attr}: ${node.attributes[attr]}\n`;
+            }
+        }
+        if (node.children) {
+            node.children.forEach(child => {
+                yamlString += convertXmlNodeToYaml(child, indentLevel + 1);
+            });
+        }
+    } else if (node.type === 'text') {
+        yamlString += `${indent}- ${node.value}\n`;
+    }
+
+    return yamlString;
 }

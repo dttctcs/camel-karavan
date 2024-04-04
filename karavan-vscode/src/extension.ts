@@ -26,6 +26,7 @@ import * as utils from "./utils";
 import * as exec from "./exec";
 import { TopologyView } from './topologyView';
 import YAML from 'yaml';
+import XmlReader from 'xml-reader';
 
 const KARAVAN_LOADED = "karavan:loaded";
 
@@ -173,7 +174,6 @@ export function activate(context: ExtensionContext) {
         commands.executeCommand('open', Uri.parse('https://github.com/apache/camel-karavan/issues/new?title=[VS+Code]New+report&template=issue_template.md'));
     });
 
-
     //** DT CUSTOM COMMANDS BEGIN ******************************************** */
     const yamlToXML = commands.registerCommand("karavan.ytx", (...args: any[]) => {
         const file = args[1][0];
@@ -193,7 +193,25 @@ export function activate(context: ExtensionContext) {
     });
     context.subscriptions.push(yamlToXML);
 
+    const xmlToYaml = commands.registerCommand('karavan.xty', (...args: any[]) => {
+        const file = args[1][0];
+        if (!file) return window.showInformationMessage("No file selected!");
+        const xml_content = fs.readFileSync(file.path, "utf8");
+        const reader = XmlReader.create();
+        reader.on('done', (data: any) => {
+            // console.log(data);
+            // console.log('***')
+            // console.log(yamlString);
+            const yamlString = utils.convertXmlNodeToYaml(data);
+            const pathArr = args[0].path.split("\/") as string[];
+            const fName = pathArr.at(-1)?.split('.')[0] ?? Date.now().toString(16);
+            const dir = pathArr.slice(0, -1).join('/');
+            fs.writeFileSync(`${dir}/${fName}.yaml`, yamlString, { flag: 'w+' });
+        });
+        reader.parse(xml_content);
 
+    });
+    context.subscriptions.push(xmlToYaml);
 }
 
 /**

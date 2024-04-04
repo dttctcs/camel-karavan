@@ -547,6 +547,11 @@
         "command": "karavan.ytx",
         "title": "Karavan: Yaml to XML",
         "icon": "$(wand)"
+      },
+      {
+        "command": "karavan.xty",
+        "title": "Karavan: XML to Yaml",
+        "icon": "$(wand)"
       }
     ],
     "menus": {
@@ -604,6 +609,11 @@
         {
           "command": "karavan.ytx",
           "when": "resourceFilename =~ /.yaml$/",
+          "group": "karavan@10"
+        },
+        {
+          "command": "karavan.xty",
+          "when": "resourceFilename =~ /.xml$/",
           "group": "karavan@10"
         }
       ],
@@ -766,6 +776,7 @@
     "rxjs": "7.8.1",
     "shelljs": "^0.8.5",
     "uuid": "9.0.1",
+    "xml-reader": "^2.4.3",
     "yaml": "^2.4.1",
     "zustand": "4.5.0"
   },
