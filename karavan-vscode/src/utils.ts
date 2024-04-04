@@ -569,6 +569,7 @@ function _handleObject(obj: YamlLeaf): string {
         const val = obj[ok];
         if (typeof val === 'string' || typeof val === 'number')
             str += `<${ok}>${val}</${ok}>\n`
+        else if (Array.isArray(val)) str += `<${ok}>${_handleArr(val, ok)}</${ok}>`
         else if (typeof val === 'object')
             str += `<${ok}>${_handleObject(val)}</${ok}>`
     }
