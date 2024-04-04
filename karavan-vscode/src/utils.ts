@@ -583,7 +583,7 @@ export function convertXmlNodeToYaml(node, indentLevel = 0) {
     const indent = '  '.repeat(indentLevel); // Two spaces for each level of indentation
 
     if (node.type === 'element') {
-        yamlString += `${indent}${node.name}:\n`;
+        yamlString += `${indent}- ${node.name}:\n`;
         if (node.attributes) {
             for (const attr in node.attributes) {
                 yamlString += `${indent}  ${attr}: ${node.attributes[attr]}\n`;
@@ -595,7 +595,7 @@ export function convertXmlNodeToYaml(node, indentLevel = 0) {
             });
         }
     } else if (node.type === 'text') {
-        yamlString += `${indent}- ${node.value}\n`;
+        yamlString += `${indent}  ${node.name}: ${node.value}\n`;
     }
 
     return yamlString;
