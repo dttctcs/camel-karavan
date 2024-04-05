@@ -176,7 +176,6 @@ export function activate(context: ExtensionContext) {
 
     //** DT CUSTOM COMMANDS BEGIN ******************************************** */
     const yamlToXML = commands.registerCommand("karavan.ytx", (...args: any[]) => {
-        console.log('Registered ytx')
         const file = args[1][0];
         if (!file) return window.showInformationMessage("No file selected!");
         const yaml_content = fs.readFileSync(file.path, "utf8");
@@ -185,7 +184,6 @@ export function activate(context: ExtensionContext) {
             const xmlString = utils.yamlObjToXML(yaml_obj);
             const pathArr = args[0].path.split("\/") as string[];
             const fName = pathArr.at(-1)?.split('.').slice(0, -1).join('.') ?? Date.now().toString(16);
-            console.log(fName);
             const dir = pathArr.slice(0, -1).join('/');
             fs.writeFileSync(`${dir}/${fName}.xml`, xmlString, { flag: 'w+' });
         } catch (error) {
@@ -201,9 +199,6 @@ export function activate(context: ExtensionContext) {
         const xml_content = fs.readFileSync(file.path, "utf8");
         const reader = XmlReader.create();
         reader.on('done', (data: any) => {
-            console.log(data);
-            // console.log('***')
-            // console.log(yamlString);
             const yamlString = utils.convertXmlNodeToYaml(data);
             const pathArr = args[0].path.split("\/") as string[];
             const fName = pathArr.at(-1)?.split('.').slice(0, -1).join('.') ?? Date.now().toString(16);

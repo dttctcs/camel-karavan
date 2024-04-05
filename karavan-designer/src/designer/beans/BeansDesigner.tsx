@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
 import {
     Button,
     Drawer,
@@ -26,22 +26,22 @@ import {
 } from '@patternfly/react-core';
 import '../karavan.css';
 import './bean.css';
-import {RegistryBeanDefinition} from "karavan-core/lib/model/CamelDefinition";
-import {CamelUi} from "../utils/CamelUi";
+import { RegistryBeanDefinition } from "karavan-core/lib/model/CamelDefinition";
+import { CamelUi } from "../utils/CamelUi";
 import PlusIcon from "@patternfly/react-icons/dist/esm/icons/plus-icon";
-import {CamelDefinitionApiExt} from "karavan-core/lib/api/CamelDefinitionApiExt";
-import {CamelUtil} from "karavan-core/lib/api/CamelUtil";
-import {BeanCard} from "./BeanCard";
-import {useDesignerStore, useIntegrationStore} from "../DesignerStore";
-import {shallow} from "zustand/shallow";
-import {DslProperties} from "../property/DslProperties";
+import { CamelDefinitionApiExt } from "karavan-core/lib/api/CamelDefinitionApiExt";
+import { CamelUtil } from "karavan-core/lib/api/CamelUtil";
+import { BeanCard } from "./BeanCard";
+import { useDesignerStore, useIntegrationStore } from "../DesignerStore";
+import { shallow } from "zustand/shallow";
+import { DslProperties } from "../property/DslProperties";
 
 export function BeansDesigner() {
 
     const [integration, setIntegration] = useIntegrationStore((s) => [s.integration, s.setIntegration], shallow)
     const [selectedStep, showDeleteConfirmation, setShowDeleteConfirmation, setSelectedStep, setNotification]
         = useDesignerStore((s) =>
-        [s.selectedStep, s.showDeleteConfirmation, s.setShowDeleteConfirmation, s.setSelectedStep, s.setNotification], shallow)
+            [s.selectedStep, s.showDeleteConfirmation, s.setShowDeleteConfirmation, s.setSelectedStep, s.setNotification], shallow)
 
     useEffect(() => {
         return () => {
@@ -72,7 +72,7 @@ export function BeansDesigner() {
             actions={[
                 <Button key="confirm" variant="primary" onClick={e => deleteBean()}>Delete</Button>,
                 <Button key="cancel" variant="link"
-                        onClick={e => setShowDeleteConfirmation(false)}>Cancel</Button>
+                    onClick={e => setShowDeleteConfirmation(false)}>Cancel</Button>
             ]}
             onEscapePress={e => setShowDeleteConfirmation(false)}>
             <div>
@@ -103,43 +103,43 @@ export function BeansDesigner() {
     function getPropertiesPanel() {
         return (
             <DrawerPanelContent isResizable
-                                hasNoBorder
-                                defaultSize={'400px'}
-                                maxSize={'800px'}
-                                minSize={'400px'}>
-                <DslProperties designerType={'beans'}/>
+                hasNoBorder
+                defaultSize={'400px'}
+                maxSize={'800px'}
+                minSize={'400px'}>
+                <DslProperties designerType={'beans'} />
             </DrawerPanelContent>
         )
     }
 
     const beans = CamelUi.getBeans(integration);
     return (
-        <PageSection className="bean-designer" isFilled padding={{default: 'noPadding'}}>
+        <PageSection className="bean-designer" isFilled padding={{ default: 'noPadding' }}>
             <Drawer isExpanded isInline>
                 <DrawerContent panelContent={getPropertiesPanel()}>
                     <DrawerContentBody>
                         <Gallery className="gallery"
-                                 hasGutter
-                                 maxWidths={{
-                                     default: '100%',
-                                 }}
+                            hasGutter
+                            maxWidths={{
+                                default: '100%',
+                            }}
                         >
                             {beans?.map((bean, index) => (
                                 <GalleryItem key={bean.uuid + index}>
                                     <BeanCard bean={bean}
-                                              selectedStep={selectedStep}
-                                              selectElement={selectBean}
-                                              deleteElement={onShowDeleteConfirmation}
+                                        selectedStep={selectedStep}
+                                        selectElement={selectBean}
+                                        deleteElement={onShowDeleteConfirmation}
                                     />
                                 </GalleryItem>
                             ))}
                             <GalleryItem>
-                                <Flex direction={{default: "row"}} justifyContent={{default: "justifyContentCenter"}}>
+                                <Flex direction={{ default: "row" }} justifyContent={{ default: "justifyContentCenter" }}>
                                     <FlexItem>
                                         <Button
                                             variant={beans?.length === 0 ? "primary" : "secondary"}
                                             data-click="ADD_REST"
-                                            icon={<PlusIcon/>}
+                                            icon={<PlusIcon />}
                                             onClick={e => createBean()}>Create bean
                                         </Button>
                                     </FlexItem>
