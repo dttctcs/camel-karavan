@@ -25,15 +25,16 @@ export class ElementMeta {
     description: string = ''
     labels: string = ''
     properties: PropertyMeta[] = []
+    exchangeProperties: ExchangePropertyMeta[] = []
 
-
-    constructor(name: string, className:string, title: string, description: string, labels: string, properties: PropertyMeta[]) {
+    constructor(name: string, className: string, title: string, description: string, labels: string, properties: PropertyMeta[], exchangeProperties: ExchangePropertyMeta[]) {
         this.name = name;
         this.className = className;
         this.title = title;
         this.description = description;
         this.labels = labels;
         this.properties = properties;
+        this.exchangeProperties = exchangeProperties;
     }
 }
 
@@ -69,6 +70,22 @@ export class PropertyMeta {
     }
 }
 
+export class ExchangePropertyMeta {
+    name: string = ''
+    displayName: string = ''
+    label: string = ''
+    javaType: string = ''
+    description: string = ''
+
+    constructor(name: string, displayName: string, label: string, javaType: string, description: string) {
+        this.name = name;
+        this.displayName = displayName;
+        this.label = label;
+        this.javaType = javaType;
+        this.description = description;
+    }
+}
+
 export class CamelMetadataApi {
 
     static getCamelModelMetadataByName = (name: string): ElementMeta | undefined => {
@@ -101,5 +118,9 @@ export class CamelMetadataApi {
 
     static hasLanguage = (name: string): boolean | undefined => {
         return Languages.filter(value => value[0] === name).length > 0;
+    }
+
+    static getExchangeProperties = (className: string): ExchangePropertyMeta [] => {
+        return CamelModelMetadata.find(e => e.className === className)?.exchangeProperties || [];
     }
 }
