@@ -2,6 +2,7 @@ import { Button, Drawer, DrawerContent, DrawerContentBody } from "@patternfly/re
 import React, { useEffect, useMemo, useCallback, useRef, useId, useState } from "react";
 import { RefsPanel } from "./RefPanel";
 import { RefCard, RefCardProps } from "./RefCard";
+import vscode from "../vscodeapi";
 
 const MOCKED_REFS: { rahlaRef: RahlaRef }[] = [
     {
@@ -44,10 +45,11 @@ const MOCKED_REFS: { rahlaRef: RahlaRef }[] = [
 export type PanelState = { id: string | undefined, ref: Partial<RahlaRef> }
 
 const INIT_REF_STATE = { id: undefined, ref: {} };
-
+//@ts-ignore
+console.log(vscode);
 export function RefsDesigner() {
     const [selectedRef, setSelectedRef] = useState<PanelState>(INIT_REF_STATE);
-
+    const [selectedFilePath, setSelectedFilePAth] = useState('');
     const submitRef = useCallback(() => {
         console.log('----Submitting ref----');
         console.log(selectedRef);
@@ -57,7 +59,39 @@ export function RefsDesigner() {
     const handleRefClick = useCallback((r: RahlaRef) => {
         console.log('Setting Ref', r);
         setSelectedRef({ id: r.id, ref: r });
+    }, []);
+
+    const handleOnMessage = (ev: any) => {
+        const { data } = ev;
+        if (data.target === 'refs') { // avoid collision with any similar logic that might be implemented later somewhere else.
+            switch (data.command) {
+                case 'selectionPath':
+                    setSelectedFilePAth(data.payload)
+                    break;
+                case 'allRefs':
+                    console.log(data.payload)
+                    break;
+                default:
+                    console.log('UNKNOWN COMMAND', data.command)
+            }
+        }
+    }
+
+    useEffect(() => {
+        window && window.addEventListener('message', handleOnMessage);
+        return () => window.removeEventListener('message', handleOnMessage);
     }, [])
+
+    /**
+     * this useEffect contains all messages that must be posted to the ext api when refs tab is mounted.
+     */
+    useEffect(() => {
+        console.log('selection path is', selectedFilePath)
+        if (!selectedFilePath)
+            vscode.postMessage({ command: 'getSelectedFile' }); // get the path of the selected yaml file.
+        vscode.postMessage({ command: 'getRefs' }); // get all refs in the yaml file.
+    }, [selectedFilePath])
+
 
     return <>
         <Drawer isExpanded isInline>
@@ -69,6 +103,7 @@ export function RefsDesigner() {
             />}>
                 <DrawerContentBody>
                     {MOCKED_REFS.map(r => <RefCard
+                        key={r.rahlaRef.id}
                         onClick={handleRefClick}
                         isSelected={selectedRef.id === r.rahlaRef.id}
                         {...r}
@@ -93,3 +128,5 @@ export interface RahlaRef {
     interface: string;
     filter: string;
 }
+
+

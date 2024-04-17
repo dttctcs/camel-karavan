@@ -37,23 +37,23 @@ export class CamelDefinitionYaml {
         } else if (integration.type === 'kamelet') {
             delete clone.type;
             // turn array of flows to object properties in template for Kamelet
-            const template: any = {route: {}}
+            const template: any = { route: {} }
             const route: RouteDefinition = clone.spec.flows.filter((f: any) => f.dslName === 'RouteDefinition')?.[0];
             if (route) {
                 template.route = Object.assign(template.route, route);
             } else if (clone.spec.template?.route) {
                 template.route = clone.spec.template.route;
             } else if (clone.spec.template?.from) {
-                template.route = {from: clone.spec.template?.from};
+                template.route = { from: clone.spec.template?.from };
             }
             const from: RouteDefinition = clone.spec.flows.filter((f: any) => f.dslName === 'FromDefinition')?.[0];
             if (from) {
-                template.from = {from: from};
+                template.from = { from: from };
             }
             const beans = clone.spec.flows.filter((f: any) => f.dslName === 'Beans')?.at(0)?.beans;
             if (beans) {
                 template.beans = beans;
-            } else if (clone.spec.template?.beans){
+            } else if (clone.spec.template?.beans) {
                 template.beans = clone.spec.template.beans;
             }
             clone.spec.template = template;
@@ -136,7 +136,7 @@ export class CamelDefinitionYaml {
             noArrayIndent: false,
             // forceQuotes: true,
             quotingType: '"',
-            sortKeys: function(a: any, b: any) {
+            sortKeys: function (a: any, b: any) {
                 if (a === 'steps') return 1;
                 else if (b === 'steps') return -1;
                 else return 0;
@@ -237,11 +237,11 @@ export class CamelDefinitionYaml {
                 // turn kamelet template object properties to array of flows
                 const beans = int.spec.template?.beans;
                 if (beans) {
-                    flows.push(new Beans({beans: beans}))
+                    flows.push(new Beans({ beans: beans }))
                 }
                 const from = int.spec.template?.from;
                 if (from) {
-                    flows.push(new RouteDefinition({from: from}))
+                    flows.push(new RouteDefinition({ from: from }))
                 } else {
                     const route = int.spec.template?.route;
                     flows.push(route);

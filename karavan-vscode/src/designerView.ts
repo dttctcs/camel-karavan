@@ -143,6 +143,14 @@ export class DesignerView {
                         case 'internalConsumerClick':
                             this.internalConsumerClick(panel, fullPath, message.uri, message.name, message.routeId);
                             break;
+                        //** DT Custom commands */
+                        case 'getSelectedFile':
+                            panel.webview.postMessage({ target: 'refs', command: 'selectionPath', payload: fullPath })
+                            break;
+                        case 'getRefs':
+                            const yamlObj = utils.parseYamlFile(fullPath);
+                            panel.webview.postMessage({ target: 'refs', command: 'allRefs', payload: yamlObj })
+                            break;
                     }
                 },
                 undefined,
