@@ -201,8 +201,8 @@ export function activate(context: ExtensionContext) {
         reader.on('done', (data: any) => {
             const yamlString = utils.convertXmlNodeToYaml(data);
             const pathArr = args[0].path.split("\/") as string[];
-            const fName = pathArr.at(-1)?.split('.').slice(0, -1).join('.') ?? Date.now().toString(16);
-            const dir = pathArr.slice(0, -1).join('/');
+            const fName = pathArr.at(-1)?.split('.').slice(0, -1).join('.') ?? Date.now().toString(16); //filename
+            const dir = pathArr.slice(0, -1).join('/'); // the directory the file is located in.
             fs.writeFileSync(`${dir}/${fName}.yaml`, yamlString, { flag: 'w+' });
         });
         reader.parse(xml_content);
