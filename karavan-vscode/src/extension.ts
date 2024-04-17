@@ -178,18 +178,17 @@ export function activate(context: ExtensionContext) {
     const yamlToXML = commands.registerCommand("karavan.ytx", (...args: any[]) => {
         const file = args[1][0];
         if (!file) return window.showInformationMessage("No file selected!");
-        const yaml_content = fs.readFileSync(file.path, "utf8");
-        try {
-            const yaml_obj = YAML.parse(yaml_content);
+
+        const yaml_obj = utils.parseYamlFile(file.path);
+        if (!yaml_obj) window.showInformationMessage("Error: failed to parse the yaml file.");
+        else {
             const xmlString = utils.yamlObjToXML(yaml_obj);
             const pathArr = args[0].path.split("\/") as string[];
             const fName = pathArr.at(-1)?.split('.').slice(0, -1).join('.') ?? Date.now().toString(16);
             const dir = pathArr.slice(0, -1).join('/');
             fs.writeFileSync(`${dir}/${fName}.xml`, xmlString, { flag: 'w+' });
-        } catch (error) {
-            window.showInformationMessage("Error: failed to parse yaml file.");
-            console.error(error);
         }
+
     });
     context.subscriptions.push(yamlToXML);
 
