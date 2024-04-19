@@ -1,19 +1,19 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
+* Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*/
 import { Uri, window, commands, WebviewPanel, ExtensionContext, ViewColumn, WebviewPanelOnDidChangeViewStateEvent } from "vscode";
 import * as path from "path";
 import * as utils from "./utils";
@@ -21,6 +21,9 @@ import { CamelDefinitionYaml } from "core/api/CamelDefinitionYaml";
 import { Integration, KameletTypes, Metadata, MetadataLabels } from "core/model/IntegrationDefinition";
 import { getWebviewContent } from "./webviewContent";
 import { RegistryBeanDefinition } from "core/model/CamelDefinition";
+import YAML from 'yaml';
+import { writeFileSync } from "fs";
+
 
 const KARAVAN_LOADED = "karavan:loaded";
 const KARAVAN_PANELS: Map<string, WebviewPanel> = new Map<string, WebviewPanel>();
@@ -148,9 +151,29 @@ export class DesignerView {
                             panel.webview.postMessage({ target: 'refs', command: 'selectionPath', payload: fullPath })
                             break;
                         case 'getRefs':
-                            const yamlObj = utils.parseYamlFile(fullPath);
-                            panel.webview.postMessage({ target: 'refs', command: 'allRefs', payload: yamlObj })
-                            break;
+                            {
+                                const yamlObj = utils.parseYamlFile(fullPath);
+                                panel.webview.postMessage({ target: 'refs', command: 'allRefs', payload: yamlObj })
+                                break;
+                            }
+                        case 'setRef':
+                            { // set a new reference or update an existing one based on the provided Id
+                                const refToSet = message.ref;
+                                const yamlObj = utils.parseYamlFile(fullPath);
+                                if (!yamlObj) return window.showErrorMessage('Failed to parse the Yaml file!')
+                                utils.setYamlRef(refToSet, yamlObj);
+                                const yaml_str = YAML.stringify(yamlObj);
+                                try {
+                                    writeFileSync(fullPath, yaml_str, { flag: 'w+' });
+                                    window.showInformationMessage('Yaml updated');
+                                } catch (error) {
+                                    window.showErrorMessage('Error writing yaml file!');
+                                    console.error(error);
+                                }
+                                finally {
+                                    break;
+                                }
+                            }
                     }
                 },
                 undefined,

@@ -50,10 +50,12 @@ console.log(vscode);
 export function RefsDesigner() {
     const [selectedRef, setSelectedRef] = useState<PanelState>(INIT_REF_STATE);
     const [selectedFilePath, setSelectedFilePAth] = useState('');
+
     const submitRef = useCallback(() => {
         console.log('----Submitting ref----');
         console.log(selectedRef);
         console.log('----Submitting ref----');
+        vscode.postMessage({ command: 'setRef', ref: selectedRef })
     }, [selectedRef])
 
     const handleRefClick = useCallback((r: RahlaRef) => {
