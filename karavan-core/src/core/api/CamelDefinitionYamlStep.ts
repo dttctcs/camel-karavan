@@ -249,6 +249,7 @@ import {
     EndpointValidatorDefinition,
     PredicateValidatorDefinition,
     ValidatorsDefinition,
+    ReferenceConfigurationDefinition,
 } from '../model/CamelDefinition';
 import {CamelUtil} from './CamelUtil';
 import {CamelMetadataApi} from '../model/CamelMetadata';
@@ -4132,6 +4133,11 @@ export class CamelDefinitionYamlStep {
         def.componentProperty = element && element?.componentProperty ? element?.componentProperty.map((x:any) => CamelDefinitionYamlStep.readRestPropertyDefinition(x)) :[]; 
 
         return def;
+    }
+
+    static readReferenceConfigurationDefinition = (element:any) => {
+      let def = element ? new ReferenceConfigurationDefinition({...element}) : new RestConfigurationDefinition();
+      return def
     }
 
     static readRestDefinition = (element: any): RestDefinition => {

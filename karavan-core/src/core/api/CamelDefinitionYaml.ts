@@ -16,7 +16,7 @@
  */
 import * as yaml from 'js-yaml';
 import { Beans, CamelElement, Integration } from '../model/IntegrationDefinition';
-import { RegistryBeanDefinition, RouteConfigurationDefinition, RouteDefinition } from '../model/CamelDefinition';
+import { ReferenceConfigurationDefinition, RegistryBeanDefinition, RouteConfigurationDefinition, RouteDefinition } from '../model/CamelDefinition';
 import { CamelUtil } from './CamelUtil';
 import { CamelDefinitionYamlStep } from './CamelDefinitionYamlStep';
 
@@ -260,6 +260,7 @@ export class CamelDefinitionYaml {
         try {
             const fromYaml: any = yaml.load(text);
             const camelized: any = CamelUtil.camelizeObject(fromYaml);
+            console.log('cml', camelized)
             if (camelized?.apiVersion && camelized.apiVersion.startsWith('camel.apache.org') && camelized.kind) {
                 if (camelized.kind === 'Integration') {
                     return 'crd';
@@ -309,14 +310,14 @@ export class CamelDefinitionYaml {
                 CamelDefinitionYamlStep.readRouteConfigurationDefinition(
                     new RouteConfigurationDefinition({ onCompletion: flow.onCompletion }),
                 ),
+            reference: flow => CamelDefinitionYamlStep.readReferenceConfigurationDefinition(new ReferenceConfigurationDefinition(flow.reference))
         };
 
         const result: any[] = [];
-
         for (const [rule, func] of Object.entries(rules)) {
             flows.filter((e: any) => e.hasOwnProperty(rule)).forEach((f: any) => result.push(func(f)));
         }
-
+        console.log('result',result)
         return result;
     };
 
