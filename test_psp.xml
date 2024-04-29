@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+           xsi:schemaLocation="
+         http://www.osgi.org/xmlns/blueprint/v1.0.0 https://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+         http://camel.apache.org/schema/blueprint https://camel.apache.org/schema/blueprint/camel-blueprint.xsd
+         http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0 https://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd">
+
+    <cm:property-placeholder id="settings.props" persistent-id="settings" update-strategy="reload"/>
+
+    <reference id="beanFactory" interface="rahla.api.GroovyBeanFactory"/>
+    <reference id="pspDataSource" interface="javax.sql.DataSource" filter="(dataSourceName=psp)"/>
+
+    <camelContext useMDCLogging="true"
+                  xmlns="http://camel.apache.org/schema/blueprint"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://camel.apache.org/schema/blueprint https://camel.apache.org/schema/blueprint/camel-blueprint-3.20.2.xsd">
+
+        <restConfiguration  component="jetty" bindingMode="off" 
+                            contextPath="{{REST_CONTEXT_PATH}}" 
+                            port="8183" 
+                            host="0.0.0.0" 
+                            apiContextRouteId="api-docs" 
+                            apiContextPath="api-docs" 
+                            enableCORS="true">
+        <dataFormatProperty key="prettyPrint" value="true"/>
+        <apiProperty key="api.version" value="1.0"/>
+        <apiProperty key="api.title" value="Protack data service"/>
+        <apiProperty key="api.description" value="This could be your marketing text"/>
+        <apiProperty key="api.contact.name" value="datatactics Supoprt"/>
+        <apiProperty key="api.contact.email" value="support@datatactics.de"/>
+        <apiProperty key="api.contact.url" value="www.datatactics.de"/>
+        </restConfiguration>
+
+        <rest id="rest" path="">
+            <get path="/load_business_partners" >
+                <to uri="direct:load_business_partners"/>
+            </get>
+            <get path="/vrm" >
+                <to uri="direct:vrm"/>
+            </get>
+            <get path="/vrm_actives_inactives" >
+                <to uri="direct:vrm_actives_inactives"/>
+            </get>
+        </rest>
+
+        <route id="timer-routes-ccc">
+            <from uri="cron:daily-initial-load?schedule=0+0+9+*+*+?"/>
+            <to uri="direct:load_business_partners" />
+            <to uri="direct:vrm" />
+        </route>
+
+        <route id="local-testing">
+            <from uri="timer://test?fixedRate=true&amp;period=5000000" />
+            <process ref="QueryDB"/>
+        </route>
+
+       <route id="vrm">
+            <from uri="direct:vrm" />
+            <to uri="direct:vrm_actives_inactives" />
+            <to uri="direct:vrm_vendors" />
+        </route>
+
+       <route id="vrm_actives_inactives">
+            <from uri="direct:vrm_actives_inactives" />
+            <setHeader name="CamelHttpMethod">
+                <constant>GET</constant>
+            </setHeader>
+            <setHeader name="Authorization">
+                <constant>Token {{VRM_TOKEN}}</constant>
+            </setHeader>
+            <setHeader name="Content-Type">
+                <constant>application/json</constant>
+            </setHeader>
+            <setHeader name="Accept">
+                <constant>application/json</constant>
+            </setHeader>
+            <removeHeader name="Exchange.HTTP_URI"/>
+
+            <toD uri="https://api.thirdpartytrust.com/api/v2/connections.inactives"/>
+            <convertBodyTo type="String"/>
+
+            <!-- <to uri="direct:list_minio" /> -->
+            <process ref="VrmExtractor"/>
+            <to uri="vrmPlan:vrm_stream"/>
+
+            <toD uri="https://api.thirdpartytrust.com/api/v2/connections.actives"/>
+            <convertBodyTo type="String"/>
+            <process ref="VrmExtractor"/>
+            <to uri="vrmPlan:vrm_stream"/>
+            <log message="vrm stream done" loggingLevel="INFO"/>            
+       </route>
+
+        <route id="vrm_vendors">
+            <from uri="direct:vrm_vendors"/>
+            <setHeader name="CamelHttpMethod">
+                <constant>GET</constant>
+            </setHeader>
+            <setHeader name="Authorization">
+                <constant>Token {{VRM_TOKEN}}</constant>
+            </setHeader>
+            <setHeader name="Content-Type">
+                <constant>csv</constant>
+            </setHeader>
+            <removeHeader name="Exchange.HTTP_URI"/>
+
+            <toD uri="https://api.thirdpartytrust.com/api/downloads/connections/vendors"/>
+            <convertBodyTo type="String"/>
+            <process ref="VrmVendorsExtractor"/>
+            <to uri="vrmPlan:vrm_vendor_stream"/>
+            <log message="vrm vendors stream done" loggingLevel="INFO"/>
+        </route>
+
+        <route id="vrmuuid">
+            <from uri="direct:vrmuuid"/>
+            <setHeader name="CamelHttpMethod">
+                <constant>GET</constant>
+            </setHeader>
+            <setHeader name="Authorization">
+                <constant>Token {{VRM_TOKEN}}</constant>
+            </setHeader>
+            <setHeader name="Content-Type">
+                <constant>application/json</constant>
+            </setHeader>
+            <setHeader name="Accept">
+                <constant>application/json</constant>
+            </setHeader>
+            <removeHeader name="Exchange.HTTP_URI"/>
+            <!-- <log message="${exchange.getProperty('uuid')}" loggingLevel="INFO"/> -->
+            <!-- <log message="${exchange.getProperty('active')}" loggingLevel="INFO"/> -->
+
+            <toD uri="https://api.thirdpartytrust.com/api/v3/connections/${exchange.getProperty('active')}/${exchange.getProperty('uuid')}"/>
+            <convertBodyTo type="String"/>
+            <process ref="VrmScoresExtractor"/>
+            <to uri="vrmPlan:vrm_stream"/>
+            <log message="vrm stream done" loggingLevel="INFO"/>
+        </route>
+     <route id="local-testing">
+            <from uri="timer://test?fixedRate=true&amp;period=500000" />
+            <to uri="direct:cobase" />
+             <log message="ping" loggingLevel="INFO"/>
+     </route>
+
+
+      <route id="initial_load">
+            <from uri="direct:initial_load"/>
+            <multicast parallelProcessing="false" stopOnException="false">
+                <log message="Starting initial load." loggingLevel="INFO"/>
+                <to uri="direct:start_busybox"/>
+                <to uri="direct:lpa-efb" />
+                <to uri="direct:aerq"/>
+                <to uri="direct:lts"/>
+                <to uri="direct:edelweiss-intune"/>
+                <to uri="direct:air-dolomiti"/>
+                <to uri="direct:bitsight" />
+                <to uri="direct:brussels" />
+                <to uri="direct:techtree" />
+                <to uri="direct:cityline" />
+                <to uri="direct:delvag" />
+                <to uri="direct:lcc"/>
+                <to uri="direct:leos" />
+                <to uri="direct:datasource_names" />
+                <to uri="direct:device42" />
+                <to uri="direct:edelweiss" />
+                <to uri="direct:eurowings" />
+                <to uri="direct:itop"/>
+                <to uri="direct:jettainer"/>
+                <to uri="direct:leanix" />
+                <to uri="direct:lht" />
+                <to uri="direct:qip" />
+                <to uri="direct:timematters"/>
+                <to uri="direct:timematters-csv"/>
+                <to uri="direct:rico"/>
+                <to uri="direct:snow"/>
+                <to uri="direct:swiss"/>
+                <to uri="direct:as-swiss"/>
+                <to uri="direct:qualys-kyndryl"/>
+                <to uri="direct:qualys-telekom"/>
+                <to uri="direct:zrh"/>
+                <to uri="direct:mmg"/>
+                <log message="Initial load completed." loggingLevel="INFO"/>
+                <to uri="direct:super_update"/>
+
+            </multicast>
+        </route>
+
+
+
+        <route id="list_minio">
+            <from uri="direct:list_minio"/>
+            <transform>
+            <groovy>
+                io.minio.ListObjectsArgs.builder()
+                    .bucket("data")
+                    .recursive(true)
+            </groovy>
+            </transform>
+
+            <to uri="minio://data?endpoint={{MINIO_ENDPOINT}}&amp;accessKey={{MINIO_ACCESS_KEY}}&amp;secretKey={{MINIO_SECRET_KEY}}&amp;operation=listObjects&amp;pojoRequest=true" />
+        </route>
+
+    </camelContext>
+
+
+    <bean id="TechTreeProcessor" factory-ref="beanFactory" factory-method="createBean">
+        <argument value="resource:deploy:TechTreeProcessor.groovy"/>
+        <property name="dataSource" ref="pspDataSource"/>
+    </bean>
+
+    <bean id="QueryDB" factory-ref="beanFactory" factory-method="createBean">
+        <argument value="resource:deploy:QueryDB.groovy"/>
+        <property name="dataSource" ref="pspDataSource"/>
+    </bean>
+
+    <bean id="TechTreeAddressProcessor" factory-ref="beanFactory" factory-method="createBean">
+        <argument value="resource:deploy:TechTreeAddressProcessor.groovy"/>
+    </bean>
+
+    <bean id="VrmExtractor" factory-ref="beanFactory" factory-method="createBean">
+        <argument value="resource:deploy:VrmExtractor.groovy"/>
+        <property name="dataSource" ref="pspDataSource"/>
+    </bean>
+
+    <bean id="VrmScoresExtractor" factory-ref="beanFactory" factory-method="createBean">
+        <argument value="resource:deploy:VrmScoresExtractor.groovy"/>
+    </bean>
+
+    <bean id="VrmVendorsExtractor" factory-ref="beanFactory" factory-method="createBean">
+        <argument value="resource:deploy:VrmVendorsExtractor.groovy"/>
+        <property name="dataSource" ref="pspDataSource"/>
+    </bean>
+   
+    <bean id="pspPlan" class="rahla.components.fradi.FradiComponent">
+        <property name="plan" value="resource:deploy:psp.siddhi"/>
+    </bean>
+
+    <bean id="vrmPlan" class="rahla.components.fradi.FradiComponent">
+        <property name="plan" value="resource:deploy:vrm.siddhi"/>
+        
+    </bean>
+
+
+
+</blueprint>

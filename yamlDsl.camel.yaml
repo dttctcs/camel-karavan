@@ -1,0 +1,198 @@
+- route:
+    id: timer-routes-ccc
+    from:
+      uri: "cron:daily-initial-load?schedule=0+0+9+*+*+?"
+      steps:
+        - to:
+            uri: "direct:load_business_partners"
+        - to:
+            uri: "direct:vrm"
+- route:
+    id: local-testing
+    from:
+      uri: "timer://test?fixedRate=true&period=5000000"
+      steps:
+        - process:
+            ref: "QueryDB"
+- route:
+    id: vrm
+    from:
+      uri: "direct:vrm"
+      steps:
+        - to:
+            uri: "direct:vrm_actives_inactives"
+        - to:
+            uri: "direct:vrm_vendors"
+- route:
+    id: vrm_actives_inactives
+    from:
+      uri: "direct:vrm_actives_inactives"
+      steps:
+        - setHeader:
+            name: "CamelHttpMethod"
+            constant: ["GET"]
+        - setHeader:
+            name: "Authorization"
+            constant: ["Token {{VRM_TOKEN}}"]
+        - setHeader:
+            name: "Content-Type"
+            constant: ["application/json"]
+        - setHeader:
+            name: "Accept"
+            constant: ["application/json"]
+        - removeHeader:
+            name: "Exchange.HTTP_URI"
+        - toD:
+            uri: "https://api.thirdpartytrust.com/api/v2/connections.inactives"
+        - toD:
+            uri: "https://api.thirdpartytrust.com/api/v2/connections.actives"
+        - convertBodyTo:
+            type: "String"
+        - convertBodyTo:
+            type: "String"
+        - process:
+            ref: "VrmExtractor"
+        - process:
+            ref: "VrmExtractor"
+        - to:
+            uri: "vrmPlan:vrm_stream"
+        - to:
+            uri: "vrmPlan:vrm_stream"
+        - log:
+            message: "vrm stream done"
+            loggingLevel: "INFO"
+- route:
+    id: vrm_vendors
+    from:
+      uri: "direct:vrm_vendors"
+      steps:
+        - setHeader:
+            name: "CamelHttpMethod"
+            constant: ["GET"]
+        - setHeader:
+            name: "Authorization"
+            constant: ["Token {{VRM_TOKEN}}"]
+        - setHeader:
+            name: "Content-Type"
+            constant: ["csv"]
+        - removeHeader:
+            name: "Exchange.HTTP_URI"
+        - toD:
+            uri: "https://api.thirdpartytrust.com/api/downloads/connections/vendors"
+        - convertBodyTo:
+            type: "String"
+        - process:
+            ref: "VrmVendorsExtractor"
+        - to:
+            uri: "vrmPlan:vrm_vendor_stream"
+        - log:
+            message: "vrm vendors stream done"
+            loggingLevel: "INFO"
+- route:
+    id: vrmuuid
+    from:
+      uri: "direct:vrmuuid"
+      steps:
+        - setHeader:
+            name: "CamelHttpMethod"
+            constant: ["GET"]
+        - setHeader:
+            name: "Authorization"
+            constant: ["Token {{VRM_TOKEN}}"]
+        - setHeader:
+            name: "Content-Type"
+            constant: ["application/json"]
+        - setHeader:
+            name: "Accept"
+            constant: ["application/json"]
+        - removeHeader:
+            name: "Exchange.HTTP_URI"
+        - toD:
+            uri: "https://api.thirdpartytrust.com/api/v3/connections/${exchange.getProperty('active')}/${exchange.getProperty('uuid')}"
+        - convertBodyTo:
+            type: "String"
+        - process:
+            ref: "VrmScoresExtractor"
+        - to:
+            uri: "vrmPlan:vrm_stream"
+        - log:
+            message: "vrm stream done"
+            loggingLevel: "INFO"
+- route:
+    id: local-testing
+    from:
+      uri: "timer://test?fixedRate=true&period=500000"
+      steps:
+        - to:
+            uri: "direct:cobase"
+        - log:
+            message: "ping"
+            loggingLevel: "INFO"
+- route:
+    id: initial_load
+    from:
+      uri: "direct:initial_load"
+      steps:
+        - multicast:
+            parallelProcessing: "false"
+            stopOnException: "false"
+            log: [{"$":{"message":"Starting initial load.","loggingLevel":"INFO"}},{"$":{"message":"Initial load completed.","loggingLevel":"INFO"}}]
+            to: [{"$":{"uri":"direct:start_busybox"}},{"$":{"uri":"direct:lpa-efb"}},{"$":{"uri":"direct:aerq"}},{"$":{"uri":"direct:lts"}},{"$":{"uri":"direct:edelweiss-intune"}},{"$":{"uri":"direct:air-dolomiti"}},{"$":{"uri":"direct:bitsight"}},{"$":{"uri":"direct:brussels"}},{"$":{"uri":"direct:techtree"}},{"$":{"uri":"direct:cityline"}},{"$":{"uri":"direct:delvag"}},{"$":{"uri":"direct:lcc"}},{"$":{"uri":"direct:leos"}},{"$":{"uri":"direct:datasource_names"}},{"$":{"uri":"direct:device42"}},{"$":{"uri":"direct:edelweiss"}},{"$":{"uri":"direct:eurowings"}},{"$":{"uri":"direct:itop"}},{"$":{"uri":"direct:jettainer"}},{"$":{"uri":"direct:leanix"}},{"$":{"uri":"direct:lht"}},{"$":{"uri":"direct:qip"}},{"$":{"uri":"direct:timematters"}},{"$":{"uri":"direct:timematters-csv"}},{"$":{"uri":"direct:rico"}},{"$":{"uri":"direct:snow"}},{"$":{"uri":"direct:swiss"}},{"$":{"uri":"direct:as-swiss"}},{"$":{"uri":"direct:qualys-kyndryl"}},{"$":{"uri":"direct:qualys-telekom"}},{"$":{"uri":"direct:zrh"}},{"$":{"uri":"direct:mmg"}},{"$":{"uri":"direct:super_update"}}]
+- route:
+    id: list_minio
+    from:
+      uri: "direct:list_minio"
+      steps:
+        - transform:
+            groovy: ["\n                io.minio.ListObjectsArgs.builder()\n                    .bucket(\"data\")\n                    .recursive(true)\n            "]
+        - to:
+            uri: "minio://data?endpoint={{MINIO_ENDPOINT}}&accessKey={{MINIO_ACCESS_KEY}}&secretKey={{MINIO_SECRET_KEY}}&operation=listObjects&pojoRequest=true"
+
+
+- beans:
+    - constructors:
+        '0': resource:deploy:TechTreeProcessor.groovy
+      factoryBean: beanFactory
+      factoryMethod: createBean
+      name: TechTreeProcessor
+      properties:
+        dataSource: pspDataSource
+    - constructors:
+        '0': resource:deploy:QueryDB.groovy
+      factoryBean: beanFactory
+      factoryMethod: createBean
+      name: QueryDB
+      properties:
+        dataSource: pspDataSource
+    - constructors:
+        '0': resource:deploy:TechTreeAddressProcessor.groovy
+      factoryBean: beanFactory
+      factoryMethod: createBean
+      name: TechTreeAddressProcessor
+    - constructors:
+        '0': resource:deploy:VrmExtractor.groovy
+      factoryBean: beanFactory
+      factoryMethod: createBean
+      name: VrmExtractor
+      properties:
+        dataSource: pspDataSource
+    - constructors:
+        '0': resource:deploy:VrmScoresExtractor.groovy
+      factoryBean: beanFactory
+      factoryMethod: createBean
+      name: VrmScoresExtractor
+    - constructors:
+        '0': resource:deploy:VrmVendorsExtractor.groovy
+      factoryBean: beanFactory
+      factoryMethod: createBean
+      name: VrmVendorsExtractor
+      properties:
+        dataSource: pspDataSource
+    - constructors:
+      name: pspPlan
+      properties:
+        plan: resource:deploy:psp.siddhi
+    - constructors:
+      name: vrmPlan
+      properties:
+        plan: resource:deploy:vrm.siddhi
