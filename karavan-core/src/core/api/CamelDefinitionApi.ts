@@ -248,6 +248,7 @@ import {
     EndpointValidatorDefinition,
     PredicateValidatorDefinition,
     ValidatorsDefinition,
+    ReferenceConfigurationDefinition,
 } from '../model/CamelDefinition';
 import {CamelUtil} from './CamelUtil';
 
@@ -1283,6 +1284,16 @@ export class CamelDefinitionApi {
         if (element?.from !== undefined) { 
             def.from = CamelDefinitionApi.createFromDefinition(element.from); 
         }
+        return def;
+    }
+
+    static createReferenceDefinition = (element:any) => {
+        const def = element ? new ReferenceConfigurationDefinition({...element}) : new ReferenceConfigurationDefinition();
+        def.uuid = element?.uuid ? element.uuid : def.uuid; 
+        if(!def.filter) def.filter = '';
+        if(!def.interface) def.interface = '';
+        if(!def.id) def.id = '';
+        if(!def.stepName) def.stepName = 'reference';
         return def;
     }
 
@@ -3161,6 +3172,7 @@ export class CamelDefinitionApi {
             case 'EndpointValidatorDefinition': return CamelDefinitionApi.createEndpointValidatorDefinition(newBody);
             case 'PredicateValidatorDefinition': return CamelDefinitionApi.createPredicateValidatorDefinition(newBody);
             case 'ValidatorsDefinition': return CamelDefinitionApi.createValidatorsDefinition(newBody);
+            case 'ReferenceConfigurationDefinition':return CamelDefinitionApi.createReferenceDefinition(newBody);
             default: return new CamelElement('');
         }
     }
