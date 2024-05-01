@@ -50,13 +50,21 @@ console.log(vscode);
 export function RefsDesigner() {
     const [selectedRef, setSelectedRef] = useState<PanelState>(INIT_REF_STATE);
     const [selectedFilePath, setSelectedFilePAth] = useState('');
+    const [refs, setRefs] = useState<RahlaRef[]>([])
 
     const submitRef = useCallback(() => {
         console.log('----Submitting ref----');
         console.log(selectedRef);
         console.log('----Submitting ref----');
         vscode.postMessage({ command: 'setRef', ref: selectedRef })
-    }, [selectedRef])
+    }, [selectedRef]);
+
+    const deleteRef = useCallback((refId: string) => {
+        console.log('----Deleting ref----');
+        console.log(refId);
+        console.log('----Deleting ref----');
+        vscode.postMessage({ command: 'deleteRef', refId })
+    }, [])
 
     const handleRefClick = useCallback((r: RahlaRef) => {
         console.log('Setting Ref', r);
@@ -71,7 +79,8 @@ export function RefsDesigner() {
                     setSelectedFilePAth(data.payload)
                     break;
                 case 'allRefs':
-                    console.log(data.payload)
+                    console.log('receiving refs!', data.payload)
+                    setRefs(extractFromYamlObjectByStepName(data.payload, 'reference'))
                     break;
                 default:
                     console.log('UNKNOWN COMMAND', data.command)
@@ -102,24 +111,35 @@ export function RefsDesigner() {
                 activeRef={selectedRef.ref}
                 setter={setSelectedRef}
                 onSubmit={submitRef}
+                deleteHandler={deleteRef}
             />}>
                 <DrawerContentBody>
-                    {MOCKED_REFS.map(r => <RefCard
-                        key={r.rahlaRef.id}
-                        onClick={handleRefClick}
-                        isSelected={selectedRef.id === r.rahlaRef.id}
-                        {...r}
-                    />)}
                     <Button
                         style={{ marginTop: 10, marginInline: 'auto' }}
                         variant="primary"
                         onClick={() => setSelectedRef(INIT_REF_STATE)}>
                         New Reference
                     </Button>
+                    {refs.map(r => <RefCard
+                        key={r.id}
+                        onClick={handleRefClick}
+                        isSelected={selectedRef.id === r.id}
+                        rahlaRef={r}
+                    />)}
                 </DrawerContentBody>
             </DrawerContent>
         </Drawer>
     </>;
+}
+
+
+function extractFromYamlObjectByStepName(yamlObject: any, stepName: string): RahlaRef[] {
+    let result: any[] = []
+    // @ts-ignore
+    if (Array.isArray(yamlObject)) yamlObject.forEach(o => stepName in o ? result.push(o[stepName] as Map<string, string>) : null)
+    // @ts-ignore
+    else Object.keys(yamlObject).forEach(k => k === stepName ? result.push(yamlObject[k]) : null)
+    return result;
 }
 
 /**
@@ -130,5 +150,5 @@ export interface RahlaRef {
     interface: string;
     filter: string;
 }
-
+type YamlLeaf = Map<string, string | YamlLeaf | YamlLeaf[]> | YamlLeaf[];
 

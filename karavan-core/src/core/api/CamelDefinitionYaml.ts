@@ -317,7 +317,6 @@ export class CamelDefinitionYaml {
         for (const [rule, func] of Object.entries(rules)) {
             flows.filter((e: any) => e.hasOwnProperty(rule)).forEach((f: any) => result.push(func(f)));
         }
-        console.log('result',result)
         return result;
     };
 

@@ -3529,9 +3529,9 @@ export class RestConfigurationDefinition extends CamelElement {
 
 export class ReferenceConfigurationDefinition extends CamelElement {
     stepName?:string = 'reference'
-    filter?: string;
-    interface?: string;
     id?: string;
+    interface?: string;
+    filter?: string;
     public constructor(init?: Partial<ReferenceConfigurationDefinition>) {
         super('ReferenceConfigurationDefinition');
         Object.assign(this, init);

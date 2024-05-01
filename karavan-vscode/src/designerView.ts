@@ -126,7 +126,6 @@ export class DesignerView {
                 this.context.extensionUri,
                 "icons/karavan.svg"
             );
-
             // Handle messages from the webview
             panel.webview.onDidReceiveMessage(
                 message => {
@@ -160,19 +159,24 @@ export class DesignerView {
                             { // set a new reference or update an existing one based on the provided Id
                                 const refToSet = message.ref;
                                 const yamlObj = utils.parseYamlFile(fullPath);
-                                if (!yamlObj) return window.showErrorMessage('Failed to parse the Yaml file!')
-                                utils.setYamlRef(refToSet, yamlObj);
+                                if (!yamlObj) return window.showErrorMessage('Failed to parse the Yaml file!');
+                                const _setYamlRefbool = utils.setYamlRef(refToSet, yamlObj);
+                                if (!_setYamlRefbool) break;
                                 const yaml_str = YAML.stringify(yamlObj);
-                                try {
-                                    writeFileSync(fullPath, yaml_str, { flag: 'w+' });
-                                    window.showInformationMessage('Yaml updated');
-                                } catch (error) {
-                                    window.showErrorMessage('Error writing yaml file!');
-                                    console.error(error);
-                                }
-                                finally {
-                                    break;
-                                }
+                                this.writeYamlFile(relativePath, yaml_str);
+                                panel.webview.postMessage({ target: 'refs', command: 'allRefs', payload: yamlObj })
+                                break;
+                            }
+                        case 'deleteRef':
+                            {
+                                const refIdToDelete = message.refId;
+                                const yamlObj = utils.parseYamlFile(fullPath);
+                                if (!yamlObj) return window.showErrorMessage('Failed to parse the Yaml file!');
+                                const newYamlObj = utils.removeRefByID(yamlObj, refIdToDelete)
+                                const yaml_str = YAML.stringify(newYamlObj);
+                                this.writeYamlFile(relativePath, yaml_str)
+                                panel.webview.postMessage({ target: 'refs', command: 'allRefs', payload: newYamlObj })
+                                break;
                             }
                     }
                 },
@@ -200,6 +204,16 @@ export class DesignerView {
             const panel = KARAVAN_PANELS.get(relativePath);
             panel?.reveal(undefined, true);
             panel?.webview.postMessage({ command: 'activate', tab: tab });
+        }
+    }
+
+    writeYamlFile(relativePath: string, yaml_str: string) {
+        try {
+            utils.save(relativePath, yaml_str)
+            window.showInformationMessage('Yaml updated');
+        } catch (error) {
+            window.showErrorMessage('Error writing yaml file!');
+            console.error(error);
         }
     }
 

@@ -627,44 +627,43 @@ export function parseYamlFile(yamlPath: string): YamlLeaf | null {
  * @param ref 
  * @param yaml 
  */
-export function setYamlRef(ref: ReferenceRecord, yaml: YamlLeaf) {
-    if (!ref.ref.id)
-        return vscode.window.showErrorMessage('Reference Id is required!');
-
+export function setYamlRef(ref: ReferenceRecord, yaml: YamlLeaf): boolean {
+    if (!ref.ref.id) {
+        vscode.window.showErrorMessage('Reference Id is required!');
+        return false;
+    }
     if (Array.isArray(yaml)) {
         for (const prop of yaml) {
             if ('reference' in prop) {
                 const foundMatch = setYamlObjectRefById(prop, ref)
-                if (foundMatch) return;
+                if (foundMatch) return true;
             }
         }
         //@ts-ignore
         yaml.push({ reference: ref.ref });
-        console.log('pushed as new ref')
-        return;
-    } else {
-        // logically, as we have multiple references, the yamlObject should be read as an array, if it is read as an object, something might be wrong
-        // still, considering a logic for in case it's an object until having a better insight over the program.
-        for (const key in yaml) {
-            if (key === 'reference') {
-                const _ref = yaml[key];
-                const foundMatch = setYamlObjectRefById(_ref, ref);
-                if (foundMatch) return;
-            }
-        }
-        yaml['reference'] = ref.ref;
-    }
+        return true;
+    } return false; // if yamlObject is not an array, something is WRONG!
 }
 
 
 function setYamlObjectRefById(yamlRefObject: any, newRef: ReferenceRecord) {
-    if (typeof yamlRefObject.reference === 'object' && 'id' in yamlRefObject && yamlRefObject.id === newRef.id) {
+    if (typeof yamlRefObject.reference === 'object' && 'id' in yamlRefObject.reference && yamlRefObject.reference.id === newRef.id) {
         yamlRefObject.reference = newRef.ref;
         return true;
     }
     return false;
 }
 
+
+export function removeRefByID(yamlObject: YamlLeaf, refId: string): YamlLeaf {
+    if (Array.isArray(yamlObject))
+        return yamlObject.filter(o => {
+            if ('reference' in o)
+                return (o.reference as RahlaRef).id !== refId
+            else return true;
+        })
+    return yamlObject;
+}
 
 export interface ReferenceRecord {
     id: string | undefined;

@@ -1290,10 +1290,10 @@ export class CamelDefinitionApi {
     static createReferenceDefinition = (element:any) => {
         const def = element ? new ReferenceConfigurationDefinition({...element}) : new ReferenceConfigurationDefinition();
         def.uuid = element?.uuid ? element.uuid : def.uuid; 
-        if(!def.filter) def.filter = '';
-        if(!def.interface) def.interface = '';
-        if(!def.id) def.id = '';
         if(!def.stepName) def.stepName = 'reference';
+        if(!def.id) def.id = '';
+        if(!def.interface) def.interface = '';
+        if(!def.filter) def.filter = '';
         return def;
     }
 
@@ -3172,7 +3172,7 @@ export class CamelDefinitionApi {
             case 'EndpointValidatorDefinition': return CamelDefinitionApi.createEndpointValidatorDefinition(newBody);
             case 'PredicateValidatorDefinition': return CamelDefinitionApi.createPredicateValidatorDefinition(newBody);
             case 'ValidatorsDefinition': return CamelDefinitionApi.createValidatorsDefinition(newBody);
-            case 'ReferenceConfigurationDefinition':return CamelDefinitionApi.createReferenceDefinition(newBody);
+            case 'ReferenceConfigurationDefinition': return CamelDefinitionApi.createReferenceDefinition(newBody);
             default: return new CamelElement('');
         }
     }

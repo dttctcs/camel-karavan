@@ -6,9 +6,10 @@ export interface RefsPanelProps {
     setter: React.Dispatch<React.SetStateAction<PanelState>>,
     onSubmit?: () => void;
     activeRef: Partial<RahlaRef>;
-    refId: string | undefined
+    refId: string | undefined;
+    deleteHandler: (refId: string) => void
 }
-export const RefsPanel = ({ setter, onSubmit, activeRef, refId }: RefsPanelProps) => {
+export const RefsPanel = ({ setter, onSubmit, activeRef, refId, deleteHandler }: RefsPanelProps) => {
 
     const handleInputChange = useCallback((name: string, value: string) => {
         setter(r => ({ id: r.id, ref: { ...r.ref, [name]: value } }))
@@ -31,8 +32,14 @@ export const RefsPanel = ({ setter, onSubmit, activeRef, refId }: RefsPanelProps
                     <FormGroup label="filter">
                         <TextInput id="filter" value={activeRef.filter ?? ''} onChange={(e, v) => handleInputChange('filter', v)} type="text" />
                     </FormGroup>
-                    <ActionGroup>
+                    <ActionGroup style={{display:'flex',flexDirection:'row',justifyContent:'space-evenly'}}>
                         <Button type="submit" variant="primary" >Submit</Button>
+                        {refId ? <Button
+                            style={{ color: 'white' }}
+                            type="button"
+                            variant="danger"
+                            onClick={() => deleteHandler(refId)}
+                        >Delete</Button> : null}
                     </ActionGroup>
                 </Form>
             </DrawerPanelBody>
