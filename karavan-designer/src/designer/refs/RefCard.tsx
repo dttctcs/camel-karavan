@@ -25,7 +25,7 @@ export const RefCard = ({ rahlaRef, onClick, isSelected }: RefCardProps) => {
             onMouseLeave={() => setHovered(false)}
         >
             <CardHeader>
-                <CardTitle style={{fontSize:'1.8rem'}}>Ref</CardTitle>
+                <CardTitle style={{fontSize:'1.6rem'}}>Ref</CardTitle>
             </CardHeader>
             <CardBody>
                 <Flex direction={{default:'column'}} alignItems={{ default: 'alignItemsFlexStart' }} rowGap={{ default: "rowGapMd" }}>
