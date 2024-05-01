@@ -63,7 +63,7 @@ export class KaravanApi {
     static setAuthType(authType: string) {
         console.log("SetAuthType", authType)
         KaravanApi.authType = authType;
-        switch (authType){
+        switch (authType) {
             case "public": {
                 KaravanApi.setPublicAuthentication();
                 break;
@@ -78,6 +78,7 @@ export class KaravanApi {
             }
         }
     }
+
     static setPublicAuthentication() {
 
     }
@@ -236,7 +237,7 @@ export class KaravanApi {
             .then(res => {
                 if (res.status === 200) {
                     after(res.data);
-                } else if (res.status === 204){
+                } else if (res.status === 204) {
                     after(undefined);
                 }
             }).catch(err => {
@@ -277,12 +278,34 @@ export class KaravanApi {
         });
     }
 
-    static async postProject(project: Project) {
-        return instance.post('/ui/project', project);
+    static async postProject(project: Project, after: (result: boolean, res: AxiosResponse<Project> | any) => void) {
+        try {
+            instance.post('/ui/project', project)
+                .then(res => {
+                    if (res.status === 200) {
+                        after(true, res);
+                    }
+                }).catch(err => {
+                after(false, err);
+            });
+        } catch (error: any) {
+            after(false, error);
+        }
     }
 
-    static async copyProject(sourceProject: string, project: Project) {
-        return instance.post('/ui/project/copy/' + sourceProject, project);
+    static copyProject(sourceProject: string, project: Project, after: (result: boolean, res: AxiosResponse<Project> | any) => void) {
+        try {
+            instance.post('/ui/project/copy/' + sourceProject, project)
+                .then(res => {
+                    if (res.status === 200) {
+                        after(true, res);
+                    }
+                }).catch(err => {
+                after(false, err);
+            });
+        } catch (error: any) {
+            after(false, error);
+        }
     }
 
     static async deleteProject(project: Project, deleteContainers: boolean, after: (res: AxiosResponse<any>) => void) {
@@ -326,8 +349,19 @@ export class KaravanApi {
         });
     }
 
-    static async saveProjectFile(file: ProjectFile) {
-        return instance.post('/ui/file', file);
+    static async saveProjectFile(file: ProjectFile, after: (result: boolean, file: ProjectFile | any) => void) {
+        try {
+            instance.post('/ui/file', file)
+                .then(res => {
+                    if (res.status === 200) {
+                        after(true, res.data);
+                    }
+                }).catch(err => {
+                after(false, err);
+            });
+        } catch (error: any) {
+            after(false, error);
+        }
     }
 
     static async putProjectFile(file: ProjectFile, after: (res: AxiosResponse<any>) => void) {
@@ -366,7 +400,7 @@ export class KaravanApi {
         });
     }
 
-    static async getTemplatesFiles( after: (files: []) => void) {
+    static async getTemplatesFiles(after: (files: []) => void) {
         instance.get('/ui/file/templates')
             .then(res => {
                 if (res.status === 200) {
@@ -377,7 +411,7 @@ export class KaravanApi {
         });
     }
 
-    static async getBeanTemplatesFiles( after: (files: ProjectFile []) => void) {
+    static async getBeanTemplatesFiles(after: (files: ProjectFile []) => void) {
         instance.get('/ui/file/templates/beans')
             .then(res => {
                 if (res.status === 200) {
@@ -434,7 +468,7 @@ export class KaravanApi {
     }
 
     static async deleteDevModeContainer(name: string, deletePVC: boolean, after: (res: AxiosResponse<any>) => void) {
-        instance.delete('/ui/devmode/' +  name + "/" + deletePVC)
+        instance.delete('/ui/devmode/' + name + "/" + deletePVC)
             .then(res => {
                 after(res);
             }).catch(err => {
@@ -684,8 +718,19 @@ export class KaravanApi {
         });
     }
 
-    static async postOpenApi(file: ProjectFile, generateRest: boolean, generateRoutes: boolean, integrationName: string) {
-        const uri = `/ui/file/openapi/${generateRest}/${generateRoutes}/${integrationName}`;
-        return instance.post(encodeURI(uri), file);
+    static async postOpenApi(file: ProjectFile, generateRest: boolean, generateRoutes: boolean, integrationName: string, after: (result: boolean, file: ProjectFile | any) => void) {
+        try {
+            const uri = `/ui/file/openapi/${generateRest}/${generateRoutes}/${integrationName}`;
+            instance.post(encodeURI(uri), file)
+                .then(res => {
+                    if (res.status === 200) {
+                        after(true, res.data);
+                    }
+                }).catch(err => {
+                after(false, err);
+            });
+        } catch (error: any) {
+            after(false, error);
+        }
     }
 }

@@ -36,7 +36,10 @@ import {Table} from '@patternfly/react-table/deprecated';
 import DeleteIcon from "@patternfly/react-icons/dist/js/icons/times-icon";
 import SearchIcon from '@patternfly/react-icons/dist/esm/icons/search-icon';
 import {useFilesStore, useFileStore, useProjectStore} from "../../api/ProjectStore";
-import {getProjectFileType, Project, ProjectFile, ProjectFileTypes} from "../../api/ProjectModels";
+import {
+    getProjectFileTypeTitle,
+    ProjectFile,
+} from "../../api/ProjectModels";
 import {FileToolbar} from "./FilesToolbar";
 import DownloadIcon from "@patternfly/react-icons/dist/esm/icons/download-icon";
 import FileSaver from "file-saver";
@@ -44,6 +47,7 @@ import {CreateFileModal} from "./CreateFileModal";
 import {DeleteFileModal} from "./DeleteFileModal";
 import {UploadFileModal} from "./UploadFileModal";
 import {shallow} from "zustand/shallow";
+import {CreateIntegrationModal} from "./CreateIntegrationModal";
 
 export function FilesTab () {
 
@@ -72,10 +76,6 @@ export function FilesTab () {
         }
     }
 
-    function isBuildIn(): boolean {
-        return ['kamelets', 'templates', 'services'].includes(project.projectId);
-    }
-
     function canDeleteFiles(): boolean {
         return !['templates', 'services'].includes(project.projectId);
     }
@@ -83,10 +83,6 @@ export function FilesTab () {
     function isKameletsProject(): boolean {
         return project.projectId === 'kamelets';
     }
-
-    const types = isBuildIn()
-        ? (isKameletsProject() ? ['KAMELET'] : ['CODE', 'PROPERTIES'])
-        : ProjectFileTypes.filter(p => !['PROPERTIES', 'KAMELET'].includes(p.name)).map(p => p.name);
 
     return (
         <PageSection className="project-tab-panel" padding={{default: "padding"}}>
@@ -107,7 +103,7 @@ export function FilesTab () {
                     </Thead>
                     <Tbody>
                         {files.map(file => {
-                            const type = getProjectFileType(file)
+                            const type = getProjectFileTypeTitle(file)
                             return <Tr key={file.name}>
                                 <Td>
                                     <Badge>{type}</Badge>
@@ -158,8 +154,9 @@ export function FilesTab () {
                     </Tbody>
                 </Table>
             </div>
-            <UploadFileModal projectId={project.projectId}/>
-            <CreateFileModal types={types} isKameletsProject={isKameletsProject()}/>
+            <UploadFileModal/>
+            {!isKameletsProject() && <CreateFileModal/>}
+            {isKameletsProject() && <CreateIntegrationModal/>}
             <DeleteFileModal />
         </PageSection>
     )

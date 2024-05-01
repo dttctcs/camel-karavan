@@ -37,7 +37,6 @@ import {useFilesStore, useFileStore, useProjectStore} from "../../api/ProjectSto
 import {shallow} from "zustand/shallow";
 import {ProjectService} from "../../api/ProjectService";
 import PushIcon from "@patternfly/react-icons/dist/esm/icons/code-branch-icon";
-import {ProjectType} from "../../api/ProjectModels";
 import {isEmpty} from "../../util/StringUtils";
 
 export function FileToolbar () {
@@ -130,6 +129,9 @@ export function FileToolbar () {
         return project ? files.filter(f => f.lastUpdate > project.lastCommitTimestamp).length > 0 : false;
     }
 
+    function isKameletsProject(): boolean {
+        return project.projectId === 'kamelets';
+    }
 
     function getDate(lastUpdate: number): string {
         if (lastUpdate) {
@@ -194,9 +196,13 @@ export function FileToolbar () {
                 </Button>
             </Tooltip>
         </FlexItem>
-        {canAddFiles() && <FlexItem>
+        {canAddFiles() && !isKameletsProject() && <FlexItem>
             <Button className="dev-action-button" size="sm" variant={"primary"} icon={<PlusIcon/>}
                     onClick={e => setFile("create")}>Create</Button>
+        </FlexItem>}
+        {canAddFiles() && isKameletsProject() && <FlexItem>
+            <Button className="dev-action-button" size="sm" variant={"primary"} icon={<PlusIcon/>}
+                    onClick={e => setFile("create", undefined, 'kamelet')}>Create</Button>
         </FlexItem>}
         {canAddFiles() && <FlexItem>
             <Button className="dev-action-button" size="sm" variant="secondary" icon={<UploadIcon/>}
