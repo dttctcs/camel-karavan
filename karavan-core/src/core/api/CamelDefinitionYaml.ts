@@ -319,6 +319,8 @@ export class CamelDefinitionYaml {
             .forEach((f: any) =>  result.push(CamelDefinitionYamlStep.readRouteConfigurationDefinition(new RouteConfigurationDefinition({interceptSendToEndpoint: f.interceptSendToEndpoint}))));
         flows.filter((e: any) => e.hasOwnProperty('onCompletion'))
             .forEach((f: any) =>  result.push(CamelDefinitionYamlStep.readRouteConfigurationDefinition(new RouteConfigurationDefinition({onCompletion: f.onCompletion}))));
+        flows.filter((e: any) => e.hasOwnProperty('reference'))
+            .forEach((f: any) =>  result.push(CamelDefinitionYamlStep.readReferenceConfigurationDefinition(new ReferenceConfigurationDefinition(f.reference))));
 
         return result;
     };
