@@ -1,4 +1,3 @@
-
 // This converters aims to convert XML files like psp.xml (camel) or pain.xml to Yaml DSL that  
 // The result is a yaml file that can generate a camel KARAVAN integration with it 
 
@@ -8,14 +7,76 @@
 //  ps : it respects identation 
 // it is still not finished There are some cases i am still testing like : bean : class  /route : choice / multicast / rest ( not done yet) / restConfiguration (not done yet )
 
-
-
-
+const yaml = require('js-yaml');
 const fs = require('fs');
 const xml2js = require('xml2js');
 
 
-//  parse routes from the XML data
+function parseRests(xmlData) {
+    const rests = [];
+    if (xmlData.blueprint && xmlData.blueprint.camelContext) {
+        for (const camelContext of xmlData.blueprint.camelContext) {
+            if (camelContext.rest) {
+                for (const rest of camelContext.rest) {
+            const restObject = {
+                id: rest.$.id,
+                path: rest.$.path || '',
+                children: []
+            };
+                for (const childElement in rest) {
+                    if (childElement !== 'id' && childElement !== '$') { 
+                        const children = Array.isArray(rest[childElement]) ? rest[childElement] : [rest[childElement]];
+                        for (const child of children) 
+
+                        restObject.children.push({
+                                tag: childElement,
+                                content: child, 
+                            });
+                        }
+                    }
+                
+            
+            rests.push(restObject);
+        }}
+        }
+    }
+    return rests;
+}
+function restsToYAML(rests) {
+    const yaml = [];
+
+    for (const rest of rests) {
+        const restObj = {
+            rest: {
+                id: rest.id,
+                path: rest.path,
+            }
+        };
+        const methods = {};
+
+        for (const child of rest.children) {
+            const methodObj = {};
+            methodObj.path = child.content.$.path || '';
+            for (const attrKey in child.content.$) {
+                if (attrKey !== 'path') {
+                    methodObj[attrKey] = child.content.$[attrKey];
+                }
+            }
+            if (child.content.to) {
+                methodObj.to = child.content.to[0].$.uri || '';
+            }
+            const methodType = child.tag.toLowerCase();
+            if (!methods[methodType]) {
+                methods[methodType] = [];
+            }
+            methods[methodType].push(methodObj);
+        }
+        Object.assign(restObj.rest, methods);
+        yaml.push(restObj);
+    }
+
+    return yaml;
+}
 
 function parseRoutes(xmlData) {
     const routes = [];
@@ -27,9 +88,8 @@ function parseRoutes(xmlData) {
                         id: route.$.id,
                         children: []
                     };
-                    // Iterate through child elements (excluding 'id' attribute)
                     for (const childElement in route) {
-                        if (childElement !== 'id' && childElement !== '$') { // Exclude 'id' and '$'
+                        if (childElement !== 'id' && childElement !== '$') { 
                             const children = Array.isArray(route[childElement]) ? route[childElement] : [route[childElement]];
                             for (const child of children) {
 
@@ -50,127 +110,167 @@ function parseRoutes(xmlData) {
 }
 
 
-
-//  convert route objects to YAML DSL
-
-function routesToYAML(routes) {
-    let yaml = '';
-    for (const route of routes) {
-        yaml += `- route:\n`;
-        yaml += `    id: ${route.id}\n`;
-        yaml += `    from:\n`; // Start of "from" section
-        for (const child of route.children) {
-            if (child.tag === 'from') {
-                yaml += `      uri: ${JSON.stringify(child.content.$.uri)}\n`; // Adding uri under from
-                if (child.content.parameter) {
-                    yaml += `      parameters:\n`;
-                    for (const parameter of child.content.parameter) {
-                        yaml += `        ${parameter.$.name}: ${JSON.stringify(parameter._)}\n`; // Adding parameters under from
-                    }
-                }
-                yaml += `      steps:\n`; // Adding "steps"
-            } else {
-                yaml += `        - ${child.tag}:\n`; // Other children
-                for (const key in child.content.$) {
-                    yaml += `            ${key}: ${JSON.stringify(child.content.$[key])}\n`; // Adding attributes
-                }
-                for (const key in child.content) {
-                    if (key !== '$') {
-                        yaml += `            ${key}: ${JSON.stringify(child.content[key])}\n`; // Adding child elements
-                    }
+function processChild(child, steps) {
+    if (child.tag !== 'from') {
+        const step = {};
+        const tagContent = child.content;
+        const tagKeys = Object.keys(tagContent);
+        
+        if (tagKeys.length === 1 && tagKeys[0] === '$') {
+            const tagValue = tagContent['$'];
+            for (const key in tagValue) {
+                step[child.tag] = step[child.tag] || {};
+                step[child.tag][key] = tagValue[key];
+            }
+        } else {
+            step[child.tag] = {};
+            for (const key in tagContent) {
+                if (key !== '$') {
+                    step[child.tag][key] = tagContent[key];
                 }
             }
         }
+        
+        steps.push(step);
     }
+    
+    if (child.children) {
+        for (const subChild of child.children) {
+            processChild(subChild, steps);
+        }
+    }
+}
+
+
+
+
+function routesToYAML(routes) {
+    const yamlObject = [];
+
+    for (const route of routes) {
+        const routeEntry = {
+            route: {
+                id: route.id,
+                from: {
+                    uri: route.children.find(child => child.tag === 'from').content.$.uri,
+                    steps: [] 
+                },
+            },
+        };
+
+        for (const child of route.children) {
+            processChild(child, routeEntry.route.from.steps);
+        }
+
+        yamlObject.push(routeEntry);
+    }
+
+    return yamlObject;
+}
+  
+
+
+
+
+
+function parseBeans(xmlData) {
+    const beans = [];
+    if (xmlData.blueprint && xmlData.blueprint.bean) {
+        for (const bean of xmlData.blueprint.bean) {
+            const beanObject = {
+                properties: {}
+            };
+            for (const attribute in bean.$) {
+                if (attribute === 'class') {
+                    beanObject.type = bean.$[attribute]; 
+                } else if (attribute === 'id') {
+                    beanObject.name = bean.$[attribute]; 
+                } else {
+                    beanObject[attribute] = bean.$[attribute];
+                }
+            }
+            if (bean.argument) {
+                beanObject.arguments = bean.argument.map(argument => argument.$.value);
+            }
+            if (bean.property) {
+                beanObject.properties = bean.property.reduce((props, prop) => {
+                    props[prop.$.name] = prop.$.ref !== undefined ? prop.$.ref : prop.$.value;
+                    return props;
+                }, {});
+            }
+
+            beans.push(beanObject);
+        }
+    }
+    return beans;
+}
+function beansToYAML(beans) {
+    let yaml = { beans: [] };
+    for (const bean of beans) {
+        let beanObj = {};
+        for (const attr in bean) {
+            if (attr !== 'arguments' && attr !== 'properties') {
+                beanObj[attr] = bean[attr];
+            }
+        }
+        if (bean.arguments && bean.arguments.length > 0) {
+            beanObj.constructors = bean.arguments.reduce((args, arg, index) => {
+                args[index] = arg;
+                return args;
+            }, {});
+        }
+        if (Object.keys(bean.properties).length > 0) {
+            beanObj.properties = bean.properties;
+        }
+        yaml.beans.push(beanObj);
+    }
+
     return yaml;
 }
 
-function parseBeans(xmlData) {
-  const beans = [];
-  if (xmlData.blueprint && xmlData.blueprint.bean) {
-      for (const bean of xmlData.blueprint.bean) {
-          const beanObject = {
-              id: bean.$.id,
-              class: bean.$.class, // Include class attribute if it exists
-              factoryBean: bean.$['factory-ref'],
-              factoryMethod: bean.$['factory-method'],
-              arguments: [], 
-              properties: {}
-          };
-
-          // Extract arguments if they exist
-          
-          if (bean.argument) {
-              const argumentsArr = Array.isArray(bean.argument) ? bean.argument : [bean.argument];
-              for (const argument of argumentsArr) {
-                  beanObject.arguments.push(argument.$.value);
-              }
-          }
-
-          // Extract properties
-
-          if (bean.property) {
-              const propertiesArr = Array.isArray(bean.property) ? bean.property : [bean.property];
-              for (const property of propertiesArr) {
-                  const propertyName = property.$.name;
-                  const propertyValue = property.$.ref !== undefined ? property.$.ref : property.$.value;
-                  beanObject.properties[propertyName] = propertyValue;
-              }
-          }
-
-          beans.push(beanObject);
-      }
-  }
-  return beans;
-}
-
-// converts bean objects to YAML DSL
-function beansToYAML(beans) {
-  let yaml = `- beans:\n`;
-  for (const bean of beans) {
-      yaml += `    - constructors:\n`; //they are only one in our case
-
-      //if (bean.class) {
-      //yaml += `    - builderClass: ${bean.class}\n`;} // Include class attribute if it exists
-      for (let i = 0; i < bean.arguments.length; i++) {
-          yaml += `        '${i}': ${bean.arguments[i]}\n`;
-      }
-      if (bean.factoryBean) {
-          yaml += `      factoryBean: ${bean.factoryBean}\n`;
-      }
-      if (bean.factoryMethod) {
-          yaml += `      factoryMethod: ${bean.factoryMethod}\n`;
-      }
-      if (bean.id) {
-          yaml += `      name: ${bean.id}\n`;
-      }
-      if (Object.keys(bean.properties).length > 0) {
-          yaml += `      properties:\n`;
-          for (const key in bean.properties) {
-              yaml += `        ${key}: ${bean.properties[key]}\n`;
-          }
-      }
-  }
-  return yaml;
+function parseRestConfiguration(xmlData) {
+    const restConfigurations = [];
+    if (xmlData.blueprint && xmlData.blueprint.camelContext) {
+        for (const camelContext of xmlData.blueprint.camelContext) {
+            if (camelContext.restConfiguration) {
+                const restConfig = camelContext.restConfiguration[0]; 
+                const restConfigurationObject = {
+                    restConfiguration: {}
+                };
+                // Extraction of attributes of restConfiguration element
+                for (const attribute in restConfig.$) {
+                    restConfigurationObject.restConfiguration[attribute] = restConfig.$[attribute];
+                }
+                // Extraction of child elements dynamically
+                for (const childElementName in restConfig) {
+                    if (childElementName !== '$') { // Exclude attributes
+                        restConfigurationObject.restConfiguration[childElementName] = [];
+                        const childElements = Array.isArray(restConfig[childElementName]) ? restConfig[childElementName] : [restConfig[childElementName]];
+                        for (const childElement of childElements) {
+                            const childObj = {};
+                            for (const attribute in childElement.$) {
+                                childObj[attribute] = childElement.$[attribute];
+                            }
+                            restConfigurationObject.restConfiguration[childElementName].push(childObj);
+                        }
+                    }
+                }
+                restConfigurations.push(restConfigurationObject);
+            }
+        }
+    }
+    return restConfigurations;
 }
 
 
+const yamlList = [];
 const xmlString = fs.readFileSync('test_psp.xml', 'utf-8');
+const parser = new xml2js.Parser();
 
 // Parse XML data
-let yamlList = [];
-function appendYAML(yaml) {
-  yamlList.push(yaml);
-}
 
-// Function to export YAML to an actual a yaml  file
-function exportToYaml(filePath) {
-  const textContent = yamlList.join('\n\n');
-  fs.writeFileSync(filePath, textContent, 'utf-8');
-  console.log(`YAMLs exported to ${filePath}`);
-}
 
-const parser = new xml2js.Parser();
+
 
 parser.parseString(xmlString, (err, result) => {
     if (err) {
@@ -178,27 +278,24 @@ parser.parseString(xmlString, (err, result) => {
         return;
     }
 
-    // Parse beans from XML data
-    const beans = parseRoutes(result);
-
-    // Convert beans to YAML
-    const yaml = routesToYAML(beans);
-    appendYAML(yaml);
-  });
-
-
-const parser1 = new xml2js.Parser();
-
-parser1.parseString(xmlString, (err, result) => {
-    if (err) {
-        console.error(err);
-        return;
-    }
-
+    const routes = parseRoutes(result);
     const beans = parseBeans(result);
-    const yaml = beansToYAML(beans);
-    appendYAML(yaml);
+    const rests = parseRests(result);
+    const restsconfig = parseRestConfiguration(result);
+
+    let beansYaml = beansToYAML(beans);
+     beansYaml = '- ' + yaml.dump(beansYaml);
+
+    fs.writeFileSync('yamlDsl.camel.yaml', beansYaml, 'utf8');
+
+    let routesYaml = routesToYAML(routes);
+    routesYaml = yaml.dump(routesYaml);
+    fs.appendFileSync('yamlDsl.camel.yaml', routesYaml, 'utf8');
+
+    let restsYaml = restsToYAML(rests);
+    restsYaml = yaml.dump(restsYaml);
+    fs.appendFileSync('yamlDsl.camel.yaml', restsYaml, 'utf8');
+
+    const restsconfigYaml = yaml.dump(restsconfig);
+    fs.appendFileSync('yamlDsl.camel.yaml', restsconfigYaml, 'utf8');
 });
-
-exportToYaml('yamlDsl.camel.yaml');
-
