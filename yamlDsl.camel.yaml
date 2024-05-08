@@ -1,198 +1,2105 @@
+- beans:
+  - name: latestAggregationStrategy
+    type: org.apache.camel.processor.aggregate.UseLatestAggregationStrategy
+  - name: elasticsearch7
+    type: org.apache.camel.component.elasticsearch.ElasticsearchComponent
+    properties:
+      hostAddresses: ${elasticsearch7.hosts}
+      user: ${elastic.user}
+      password: ${elastic.pass}
+      enableSSL: ${elastic.ssl}
+  - name: Flight
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:generating/Flight.groovy
+  - name: OpsIndexRequest
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:generating/OpsIndexRequest.groovy
+  - name: AcPerformance
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:parsing/AcPerformance.groovy
+  - name: ASM
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:parsing/ASM.groovy
+  - name: ATCFlightPlan
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:parsing/ATCFlightPlan.groovy
+  - name: CPM
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:parsing/CPM.groovy
+  - name: DIV
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:parsing/DIV.groovy
+  - name: FPL
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:parsing/FPL.groovy
+  - name: FlightDetail
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:parsing/FlightDetail.groovy
+  - name: FlightImage
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:parsing/FlightImage.groovy
+  - name: FlightPlan
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:parsing/FlightPlan.groovy
+  - name: FlightPlanExtra
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:parsing/FlightPlanExtra.groovy
+  - name: FlightInfo
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:parsing/FlightInfo.groovy
+  - name: FlightUpdate
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:parsing/FlightUpdate.groovy
+  - name: FlySmart
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:parsing/FlySmart.groovy
+  - name: FlySmart2
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:parsing/FlySmart2.groovy
+  - name: SABLE
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:parsing/SABLE.groovy
+  - name: FWAG
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:parsing/FWAG.groovy
+  - name: GroundEvent
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:parsing/GroundEvent.groovy
+  - name: LDM
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:parsing/LDM.groovy
+  - name: MVA
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:parsing/MVA.groovy
+  - name: MVT
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:parsing/MVT.groovy
+  - name: PrivilegedTransports
+    FactoryBean: beanFactory
+    factory-method: createBean
+    init-method: t
+    constructors:
+      '0': resource:deploy:parsing/PrivilegedTransports.groovy
+  - name: TypeB
+    FactoryBean: beanFactory
+    factory-method: createBean
+    constructors:
+      '0': resource:deploy:parsing/TypeB.groovy
+  - name: acPerformanceFusion
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/acPerformanceFusion.siddhi
+  - name: afpVault
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/afpVault.siddhi
+  - name: afpFusion
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/afpFusion.siddhi
+  - name: alteaVault
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/alteaVault.siddhi
+  - name: wabFusion
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/wabFusion.siddhi
+  - name: acPerformanceVault
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/acPerformanceVault.siddhi
+  - name: flightDetailFusion
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/flightDetailFusion.siddhi
+  - name: flightDetailVault
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/flightDetailVault.siddhi
+  - name: flightPlanVault
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/flightPlanVault.siddhi
+  - name: flightPlanFusion
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/flightPlanFusion.siddhi
+  - name: flightPlanVaultExtra
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/flightPlanVaultExtra.siddhi
+  - name: flightPlanVaultFuel
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/flightPlanVaultFuel.siddhi
+  - name: flightInfoVault
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/flightInfoVault.siddhi
+  - name: flightInfoFusion
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/flightInfoFusion.siddhi
+  - name: flightUpdateFusion
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/flightUpdateFusion.siddhi
+  - name: flightUpdateVault
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/flightUpdateVault.siddhi
+  - name: flysmartVault
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/flysmartVault.siddhi
+  - name: flysmartVault2
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/flysmart2Vault.siddhi
+  - name: fwagVault
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/fwagVault.siddhi
+  - name: groundEventVault
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/groundEventVault.siddhi
+  - name: groundEventFusion
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/groundEventFusion.siddhi
+  - name: legsFusion
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/legsFusion.siddhi
+  - name: mvtFusion
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/mvtFusion.siddhi
+  - name: linkLeg
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/linkLeg.siddhi
+  - name: ofpDispatch
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/ofpDispatch.siddhi
+  - name: sableVault
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/sableVault.siddhi
+  - name: privilegedTransports
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/privilegedTransports.siddhi
+  - name: fplVault
+    type: rahla.components.fradi.FradiComponent
+    properties:
+      plan: resource:deploy:processing/fplVault.siddhi
+- rest:
+    id: push
+    path: /
+    post:
+      - path: /push/DWH.FUEL.FROM.WAB.OS
+        id: push-wab-fwag
+        produces: text/plain
+        description: >-
+          Flightreports are WaB (Weight and Balance) related messages from
+          Flughafen Wien AG
+        to: direct:wab-fwag
+      - path: /access_request
+        id: access-request
+        consumes: multipart/form-data
+        produces: application/json
+        description: >-
+          EFB (Electronic Flight Bag) are WaB (Weight and Balance) related
+          messages from Flysmart
+                    (Eurowings)
+        to: direct:flysmart
+      - path: /push/DWH.FUEL.FROM.FLYSMART.NEW.EW
+        id: push-flysmart2
+        produces: text/plain
+        description: >-
+          EFB (Electronic Flight Bag) are WaB (Weight and Balance) related
+          messages from Flysmart
+                    (Eurowings)
+        to: direct:flysmart2
+      - path: /push/DWH.FUEL.FROM.ICARO.EN
+        id: push-flight-detail-en
+        produces: text/plain
+        description: >-
+          FDM (Flight Detail Messages) are MVT (movement) related messages from
+          ICARO (Air
+                    Dolomiti)
+        to: direct:flight-detail-en
+      - path: /push/DWH.FUEL.FROM.AEROLOGIC
+        id: push-flight-detail-3s
+        produces: text/plain
+        description: >-
+          FDM (Flight Detail Messages) are MVT (movement) related messages from
+          NetLine Aerologic
+        to: direct:flight-detail-3s
+      - path: /push/DWH.FUEL.FROM.NL.OPS.EW
+        id: push-flight-detail-ew
+        produces: text/plain
+        description: >-
+          FDM (Flight Detail Messages) are MVT (movement) related messages from
+          NetLine Eurowings
+        to: direct:flight-detail-ew
+      - path: /push/DWH.FUEL.FROM.NL.OPS.OS
+        id: push-flight-detail-os
+        produces: text/plain
+        description: >-
+          FDM (Flight Detail Messages) are MVT (movement) related messages from
+          NetLine Austrian
+                    Airlines
+        to: direct:flight-detail-os
+      - path: /push/DWH.FUEL.FROM.NL.OPS.XQ
+        id: push-flight-detail-xq
+        produces: text/plain
+        description: >-
+          FDM (Flight Detail Messages) are MVT (movement) related messages from
+          NetLine SunExpress
+        to: direct:flight-detail-xq
+      - path: /push/DWH.FUEL.FROM.NL.OPS.GAF
+        id: push-flight-detail-gaf
+        produces: text/plain
+        description: >-
+          FDM (Flight Detail Messages) are MVT (movement) related messages from
+          NetLine German Air Force
+        to: direct:flight-detail-gaf
+      - path: /push/DWH.FUEL.FROM.NGOPS.LHG.FLIGHTDETAIL
+        id: push-flight-detail-ngops
+        produces: text/plain
+        description: >-
+          FDM (Flight Detail Messages) are MVT (movement) related messages from
+          NetLine/Ops++
+        to: direct:flight-detail-ngops
+      - path: /push/DWH.FUEL.FROM.NGOPS.LHG.ACPERFORMANCE
+        id: push-ac-performance
+        produces: text/plain
+        description: >-
+          AcPerformance (aircraft performance) are MVT (movement) related
+          messages from
+                    NetLine/Ops++
+        to: direct:ac-performance
+      - path: /push/DWH.FUEL.FROM.NGOPS.LHG.GROUNDEVENT
+        id: push-ground-event
+        produces: text/plain
+        description: GroundEvent are MVT (movement) related messages from NetLine/Ops++
+        to: direct:ground-event
+      - path: /push/DWH.FUEL.FROM.TANGO.FLUP
+        id: push-flight-update
+        produces: text/plain
+        description: >-
+          Flight Update messages (FLUPs) are MVT (movement) related messages
+          from Tango Flight
+                    Information Service
+        to: direct:flight-update
+      - path: /push/SN.ROTATION.TO.DWH.FUEL
+        id: push-blue-one
+        produces: text/plain
+        description: >-
+          BlueOne messages are MVT (movement) related messages from Brussels
+          Airlines (SN)
+        to: direct:flight-info
+      - path: /push/DWH.FUEL.FROM.MSEXCHANGE.1
+        id: push-telex-msexchange-1
+        produces: text/plain
+        description: Mail Telex fuel1dwh@dlh.de
+        to: direct:telex-mail
+      - path: /push/DWH.FUEL.FROM.MSEXCHANGE.2
+        id: push-telex-msexchange-2
+        produces: text/plain
+        description: Mail Telex fuel2dwh@dlh.de
+        to: direct:telex-mail
+      - path: /push/DWH.FUEL.FROM.MSEXCHANGE.3
+        id: push-telex-msexchange-3
+        produces: text/plain
+        description: Mail Telex fuel3dwh@dlh.de
+        to: direct:telex-mail
+      - path: /push/DWH.FUEL.FROM.MSEXCHANGE.4
+        id: push-telex-msexchange-4
+        produces: text/plain
+        description: Mail Telex mt.ham.fuel4dwh@dlh.de
+        to: direct:telex-mail
+      - path: /push/DWH.FUEL.FROM.MESX
+        id: push-telex-mesx
+        produces: text/plain
+        description: MESX Telex
+        to: direct:telex-mesx
+      - path: /push/ISB.OFP.ATC.EW.TO.DWHFUEL
+        id: push-ofp-ew
+        produces: text/xml
+        description: Original flight plans from LIDO EW
+        to: direct:flightplan-ew
+      - path: /push/ISB.OFP.ATC.LH.TO.DWHFUEL
+        id: push-ofp-lh
+        produces: text/xml
+        description: Original flight plans from LIDO LH
+        to: direct:flightplan-lh
+      - path: /push/ISB.OFP.ATC.LX.TO.DWHFUEL
+        id: push-ofp-lx
+        produces: text/xml
+        description: Original flight plans from Sabre LX
+        to: direct:flightplan-lx
+      - path: /push/ISB.OFP.ATC.OS.TO.DWHFUEL
+        id: push-ofp-os
+        produces: text/xml
+        description: Original flight plans from Sabre OS
+        to: direct:flightplan-os
+      - path: /push/DWH.FUEL.FROM.1A.DCSFM.FLIGHTIMAGE
+        id: push-altea
+        produces: text/plain
+        description: >-
+          FlightImages (Altéa FM) are WaB (Weight and Balance) related messages
+          from Amadeus
+        to: direct:flight-image
+      - path: /push/TIME.MATTERS.TO.FLT
+        id: push-privileged-transports
+        produces: text/plain
+        description: >-
+          time:matters provides emergency and supply-chain logistics, addressing
+          time-critical needs
+                    worldwide
+        to: direct:privileged-transports
+      - path: /push/DWH.FUEL.FROM.WAB.3S
+        id: push-sable
+        produces: text/plain
+        description: placeholder
+        to: direct:sable
+    get:
+      - path: /assign/{day}
+        produces: text/plain
+        id: get-assign
+        description: ''
+        to: direct:batchAssign
+- restConfiguration:
+    component: jetty
+    bindingMode: 'off'
+    contextPath: flt/ops
+    port: '8183'
+    host: 0.0.0.0
+    test: hi
+    apiContextRouteId: api-docs
+    apiContextPath: api-docs
+    enableCORS: 'true'
+    dataFormatProperty:
+      - key: prettyPrint
+        value: 'true'
+    apiProperty:
+      - key: api.version
+        value: '1.0'
+      - key: api.version
+        value: '1.0'
+      - key: api.title
+        value: Rest Service
 - route:
-    id: timer-routes-ccc
+    id: flightplan-ew
     from:
-      uri: "cron:daily-initial-load?schedule=0+0+9+*+*+?"
+      uri: direct:flightplan-ew
       steps:
+        - setHeader:
+            name: source
+            constant: Lido-EW
         - to:
-            uri: "direct:load_business_partners"
-        - to:
-            uri: "direct:vrm"
+            uri: direct:flightplan-filter
 - route:
-    id: local-testing
+    id: flightplan-lh
     from:
-      uri: "timer://test?fixedRate=true&period=5000000"
+      uri: direct:flightplan-lh
+      steps:
+        - setHeader:
+            name: source
+            constant: Lido-LH
+        - to:
+            uri: direct:flightplan-filter
+- route:
+    id: flightplan-lx
+    from:
+      uri: direct:flightplan-lx
+      steps:
+        - setHeader:
+            name: source
+            constant: Sabre-LX
+        - to:
+            uri: direct:flightplan-filter
+- route:
+    id: flightplan-os
+    from:
+      uri: direct:flightplan-os
+      steps:
+        - setHeader:
+            name: source
+            constant: Sabre-OS
+        - to:
+            uri: direct:flightplan-filter
+- route:
+    id: flightplan-filter
+    errorHandlerRef: flightplan-error-handler
+    from:
+      uri: direct:flightplan-filter
+      steps:
+        - choice:
+            when:
+              - xpath: /*[local-name() = 'FlightPlan']
+                setHeader:
+                  - name: index
+                    constant: flightplan
+                  - name: type
+                    constant: flightplan
+                multicast:
+                  - stopOnException: 'true'
+                    to:
+                      - uri: direct:flightplan
+                      - uri: direct:flightplan-extra
+              - xpath: /*[local-name() = 'FlightPlanAtcIcao']
+                setHeader:
+                  - name: index
+                    constant: atc-flightplan
+                  - name: type
+                    constant: atc-flightplan
+                to:
+                  - uri: direct:atc-flightplan
+            otherwise:
+              - log:
+                  - message: reason=unhandled flightplan type, data=${body}
+                    logName: flightplan-filter
+                    loggingLevel: WARN
+        - to:
+            uri: direct:okResponse
+- route:
+    id: wab-fwag
+    from:
+      uri: direct:wab-fwag
+      steps:
+        - setHeader:
+            name: source
+            constant: FWAG
+        - setHeader:
+            name: type
+            constant: flight-report
+        - setHeader:
+            name: index
+            constant: flight-report
+        - process:
+            ref: FWAG
+        - to:
+            uri: direct:elasticsearch7
+        - to:
+            uri: fwagVault:flightreportStream
+        - to:
+            uri: direct:okResponse
+- route:
+    id: flysmart2
+    from:
+      uri: direct:flysmart2
+      steps:
+        - setHeader:
+            name: source
+            constant: FlySmart
+        - setHeader:
+            name: type
+            constant: loadsheet2
+        - setHeader:
+            name: index
+            constant: loadsheet
+        - process:
+            ref: FlySmart2
+        - to:
+            uri: direct:elasticsearch7
+        - to:
+            uri: direct:okResponse
+        - split:
+            simple: ${body}
+            choice:
+              - when:
+                  - simple: ${body.key} == 'report'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flysmartVault2:reportStream
+                  - simple: ${body.key} == 'report-cabin-zone'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flysmartVault2:reportCabinZoneStream
+                  - simple: ${body.key} == 'report-compartment'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flysmartVault2:reportCompartmentStream
+                  - simple: >-
+                      ${body.key} ==
+                      'report-ramp-fuel-distribution-fuel-dist-vector'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flysmartVault2:reportRampFuelDistributionFuelDistVectorStream
+                  - simple: >-
+                      ${body.key} ==
+                      'report-fuel-dist-at-take-off-fuel-dist-vector'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flysmartVault2:reportFuelDistAtTakeOffFuelDistVectorStream
+                  - simple: >-
+                      ${body.key} ==
+                      'report-fuel-dist-at-landing-fuel-dist-vector'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flysmartVault2:reportFuelDistAtLandingFuelDistVectorStream
+                  - simple: ${body.key} == 'report-tank-quantity'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flysmartVault2:reportTankQuantityStream
+                  - simple: ${body.key} == 'report-pax-total'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flysmartVault2:reportPaxTotalStream
+                otherwise:
+                  - log:
+                      - message: reason=unhandled stream processing, data=${body.key}
+                        logName: flysmart2
+                        loggingLevel: WARN
+- route:
+    id: telex
+    from:
+      uri: direct:telex
+      steps:
+        - process:git
+            ref: TypeB
+        - choice:
+            when:
+              - simple: '''ASM'' == ${body[smi]}'
+                setHeader:
+                  - name: type
+                    constant: telex-asm
+                to:
+                  - uri: direct:telex-asm
+              - simple: '''CPM'' == ${body[smi]}'
+                setHeader:
+                  - name: type
+                    constant: telex-cpm
+                to:
+                  - uri: direct:telex-cpm
+              - simple: '''DIV'' == ${body[smi]}'
+                setHeader:
+                  - name: type
+                    constant: telex-div
+                to:
+                  - uri: direct:telex-div
+              - simple: '''LDM'' == ${body[smi]}'
+                setHeader:
+                  - name: type
+                    constant: telex-ldm
+                to:
+                  - uri: direct:telex-ldm
+              - simple: '''MVA'' == ${body[smi]}'
+                setHeader:
+                  - name: type
+                    constant: telex-mva
+                to:
+                  - uri: direct:telex-mva
+              - simple: '''MVT'' == ${body[smi]}'
+                setHeader:
+                  - name: type
+                    constant: telex-mvt
+                to:
+                  - uri: direct:telex-mvt
+              - simple: '''SSM'' == ${body[smi]}'
+                setHeader:
+                  - name: type
+                    constant: telex-ssm
+                to:
+                  - uri: direct:telex-ssm
+              - simple: '''(FPL'' == ${body[messageType]}'
+                setHeader:
+                  - name: type
+                    constant: telex-fpl
+                to:
+                  - uri: direct:telex-fpl
+            otherwise:
+              - setHeader:
+                  - name: type
+                    constant: parser_error
+                  - name: index
+                    constant: parser_error
+                log:
+                  - message: Unhandled Telex:${body}\n${exchangeProperty.message}
+                    loggingLevel: WARN
+                to:
+                  - uri: direct:elasticsearch7
+        - to:
+            uri: direct:okResponse
+- route:
+    id: telex-asm
+    from:
+      uri: direct:telex-asm
       steps:
         - process:
-            ref: "QueryDB"
+            ref: ASM
+        - to:
+            uri: direct:elasticsearch7
 - route:
-    id: vrm
+    id: telex-cpm
     from:
-      uri: "direct:vrm"
+      uri: direct:telex-cpm
+      steps:
+        - process:
+            ref: CPM
+        - to:
+            uri: direct:elasticsearch7
+- route:
+    id: telex-div
+    from:
+      uri: direct:telex-div
+      steps:
+        - process:
+            ref: DIV
+        - to:
+            uri: direct:elasticsearch7
+- route:
+    id: telex-ldm
+    from:
+      uri: direct:telex-ldm
+      steps:
+        - process:
+            ref: LDM
+        - to:
+            uri: direct:elasticsearch7
+- route:
+    id: telex-mva
+    from:
+      uri: direct:telex-mva
+      steps:
+        - process:
+            ref: MVA
+        - to:
+            uri: direct:elasticsearch7
+        - split:
+            simple: ${body}
+            choice:
+              - when:
+                  - simple: ${body.key} == 'mva'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: mvtFusion:mvaStream
+                otherwise:
+                  - log:
+                      - message: INVALID MVA\n${body}
+                        loggingLevel: WARN
+- route:
+    id: telex-mvt
+    from:
+      uri: direct:telex-mvt
+      steps:
+        - process:
+            ref: MVT
+        - to:
+            uri: direct:elasticsearch7
+        - split:
+            simple: ${body}
+            choice:
+              - when:
+                  - simple: ${body.key} == 'mvt'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: mvtFusion:mvtStream
+                otherwise:
+                  - log:
+                      - message: INVALID MVT\n${body}
+                        loggingLevel: WARN
+- route:
+    id: telex-ssm
+    from:
+      uri: direct:telex-ssm
       steps:
         - to:
-            uri: "direct:vrm_actives_inactives"
-        - to:
-            uri: "direct:vrm_vendors"
+            uri: direct:elasticsearch7
 - route:
-    id: vrm_actives_inactives
+    id: telex-fpl
     from:
-      uri: "direct:vrm_actives_inactives"
+      uri: direct:telex-fpl
+      steps:
+        - process:
+            ref: FPL
+        - split:
+            simple: ${body}
+            choice:
+              - when:
+                  - simple: ${body.key} == 'fpl'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: fplVault:fplStream
+                      - uri: afpFusion:fplStream
+                  - simple: ${body.key} == 'fpl.field15'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: fplVault:fplField15Stream
+                  - simple: ${body.key} == 'fpl.field18'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: fplVault:fplField18Stream
+                otherwise:
+                  - log:
+                      - message: INVALID FPL\n${body}
+                        loggingLevel: WARN
+- route:
+    id: flight-image
+    from:
+      uri: direct:flight-image
       steps:
         - setHeader:
-            name: "CamelHttpMethod"
-            constant: ["GET"]
+            name: source
+            constant: Altea
         - setHeader:
-            name: "Authorization"
-            constant: ["Token {{VRM_TOKEN}}"]
+            name: type
+            constant: flight-image
         - setHeader:
-            name: "Content-Type"
-            constant: ["application/json"]
-        - setHeader:
-            name: "Accept"
-            constant: ["application/json"]
-        - removeHeader:
-            name: "Exchange.HTTP_URI"
-        - toD:
-            uri: "https://api.thirdpartytrust.com/api/v2/connections.inactives"
-        - toD:
-            uri: "https://api.thirdpartytrust.com/api/v2/connections.actives"
-        - convertBodyTo:
-            type: "String"
-        - convertBodyTo:
-            type: "String"
+            name: index
+            constant: flight-image
         - process:
-            ref: "VrmExtractor"
+            ref: FlightImage
+        - to:
+            uri: direct:elasticsearch7
+        - to:
+            uri: direct:okResponse
+        - split:
+            simple: ${body}
+            choice:
+              - when:
+                  - simple: ${body.key} == 'flight-image'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageStream
+                  - simple: ${body.key} == 'flight-image-saleable-configuration'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageSaleableConfigurationStream
+                  - simple: ${body.key} == 'flight-image-stab-details'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageStabDetailsStream
+                  - simple: ${body.key} == 'flight-image-location-information'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageLocationInformationStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-sent-document-type-and-edition'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageSentDocumentTypeAndEditionStream
+                  - simple: ${body.key} == 'flight-image-external-cargo-system'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageExternalCargoSystemStream
+                  - simple: ${body.key} == 'flight-image-aircraft-configuration'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageAircraftConfigurationStream
+                  - simple: ${body.key} == 'flight-image-contact-details'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageContactDetailsStream
+                  - simple: ${body.key} == 'flight-image-contact-details-phone-number'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageContactDetailsPhoneNumberStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-contact-details-workstation-and-external-system'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageContactDetailsWorkstationAndExternalSystemStream
+                  - simple: ${body.key} == 'flight-image-contact-details-printers'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageContactDetailsPrintersStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-contact-details-domain-information'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageContactDetailsDomainInformationStream
+                  - simple: ${body.key} == 'flight-image-fuel-details'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageFuelDetailsStream
+                  - simple: ${body.key} == 'flight-image-fuel-details-fuel-figures'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageFuelDetailsFuelFiguresStream
+                      - uri: wabFusion:flightImageFuelDetailsFuelFiguresStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-fuel-details-tank-information'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageFuelDetailsTankInformationStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-fuel-details-tank-information-tank-figures'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageFuelDetailsTankInformationTankFiguresStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-passenger-and-bags-by-destination-passenger-figures'
+                                  
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImagePassengerAndBagsByDestinationPassengerFiguresStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-passenger-and-bags-by-destination-baggage-figures'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImagePassengerAndBagsByDestinationBaggageFiguresStream
+                  - simple: ${body.key} == 'flight-image-passenger-and-baggage-total'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImagePassengerAndBaggageTotalStream
+                  - simple: ${body.key} == 'flight-image-weights-by-destination'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageWeightsByDestinationStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-weights-by-destination-deadload-summary'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageWeightsByDestinationDeadloadSummaryStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-weights-by-destination-total-passenger-by-destination'
+                                  
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageWeightsByDestinationTotalPassengerByDestinationStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-weights-by-destination-total-rush-bag-details'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageWeightsByDestinationTotalRushBagStream
+                  - simple: ${body.key} == 'flight-image-cabin-section-information'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageCabinSectionInformationStream
+                  - simple: ${body.key} == 'flight-image-departure-plan-activities'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageDeparturePlanActivitiesStream
+                  - simple: ${body.key} == 'flight-image-weight-data'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageWeightDataStream
+                      - uri: wabFusion:flightImageWeightDataStream
+                  - simple: ${body.key} == 'flight-image-index-data'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageIndexDataStream
+                  - simple: ${body.key} == 'flight-image-index-and-mac-limits'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageIndexAndMacLimitsStream
+                  - simple: ${body.key} == 'flight-image-fzfw-sent'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageFzfwSentStream
+                  - simple: ${body.key} == 'flight-image-fzfw-sent-free-text'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageFzfwSentFreeTextStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-loading-lane-total-weight-by-deck'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageLoadingLaneTotalWeightByDeckStream
+                  - simple: |-
+                      ${body.key} ==
+                                    'flight-image-loading-lane-total-weight-by-deck-loading-lane-total-weight'
+                                  
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageLoadingLaneTotalWeightByDeckLoadingLaneTotalWeightStream
+                  - simple: |-
+                      ${body.key} ==
+                                    'flight-image-standard-and-historical-data-standard-and-historical-pax-data'
+                                  
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageStandardAndHistoricalDataStandardAndHistoricalPaxDataStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-standard-and-historical-data-historical-bags-data'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageStandardAndHistoricalDataHistoricalBagsDataStream
+                  - simple: ${body.key} == 'flight-image-dry-operating-weight-details'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageDryOperatingWeightDetailsStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-dry-operating-weight-details-available-crew-seat'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageDryOperatingWeightDetailsAvailableCrewSeatStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-dry-operating-weight-details-crew-location-details'
+                                  
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageDryOperatingWeightDetailsCrewLocationDetailsStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-dry-operating-weight-details-pantry-location-details'
+                                  
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageDryOperatingWeightDetailsPantryLocationDetailsStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-dry-operating-weight-details-swa-details'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageDryOperatingWeightDetailsSwaDetailsStream
+                  - simple: ${body.key} == 'flight-image-containerised-indicator'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageContainerisedIndicatorStream
+                  - simple: ${body.key} == 'flight-image-load-per-deck-and-hold'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageLoadPerDeckAndHoldStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-load-per-deck-and-hold-overhang-measurements'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageLoadPerDeckAndHoldOverhangMeasurementsStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-load-per-deck-and-hold-piece-up-height'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageLoadPerDeckAndHoldPieceUpHeightStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-load-per-deck-and-hold-load-description'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageLoadPerDeckAndHoldLoadDescriptionStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-load-per-deck-and-hold-commerically-linked-commodity'
+                                  
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageLoadPerDeckAndHoldComericallyLinkedCommodityStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-load-per-deck-and-hold-indicators'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageLoadPerDeckAndHoldIndicatorsStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-load-per-deck-and-hold-floating-pallet-details'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageLoadPerDeckAndHoldFloatingPalletDetailsStream
+                  - simple: |-
+                      ${body.key} ==
+                                    'flight-image-load-per-deck-and-hold-floating-pallet-details-load-points'
+                                  
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageLoadPerDeckAndHoldFloatingPalletDetailsLoadPointsStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-load-per-deck-and-hold-deadload-details'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageLoadPerDeckAndHoldDeadloadDetailsStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-load-per-deck-and-hold-deadload-details-dgsl-code'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageLoadPerDeckAndHoldDeadloadDetailsDgslCodeStream
+                  - simple: ${body.key} == 'flight-image-dgsl-details'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageDgslDetailsStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-dgsl-details-subsidiary-risk-grp'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageDgslDetailsSubsidiaryRiskGrpStream
+                  - simple: >-
+                      ${body.key} ==
+                      'flight-image-dgsl-details-dgsl-weight-and-height-code'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          alteaVault:flightImageDgslDetailsDgslWeightAndHeightCodeStream
+                  - simple: ${body.key} == 'flight-image-dgsl-details-apio-or-ovp-id'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageDgslDetailsApioOrOvpIdStream
+                  - simple: ${body.key} == 'flight-image-checkin-baggage-details'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: alteaVault:flightImageCheckinBaggageDetailsStream
+                otherwise:
+                  - log:
+                      - message: reason=unhandled stream processing, data=${body.key}
+                        logName: flight-image
+                        loggingLevel: WARN
+- route:
+    id: flightplan
+    from:
+      uri: direct:flightplan
+      steps:
         - process:
-            ref: "VrmExtractor"
+            ref: FlightPlan
         - to:
-            uri: "vrmPlan:vrm_stream"
+            uri: direct:elasticsearch7
         - to:
-            uri: "vrmPlan:vrm_stream"
+            uri: direct:flightplan-process
+- route:
+    id: flightplan-extra
+    from:
+      uri: direct:flightplan-extra
+      steps:
+        - process:
+            ref: FlightPlanExtra
+        - to:
+            uri: direct:flightplan-process
+- route:
+    id: flightplan-process
+    from:
+      uri: direct:flightplan-process
+      steps:
+        - script:
+            groovy: |2-
+
+                        import java.sql.Timestamp
+                        headers["firstJan1970"] = new Timestamp(0 as Long)
+                      
+        - split:
+            simple: ${body}
+            choice:
+              - when:
+                  - simple: ${body.key} == 'ofp'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flightPlanVault:ofpStream
+                      - uri: flightPlanFusion:ofpStream
+                  - simple: ${body.key} == 'doc'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: ofpDispatch:ofpDocument
+                  - simple: ${body.key} == 'ofp-waypoints'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flightPlanVaultExtra:ofpWaypointsStream
+                  - simple: ${body.key} == 'ofp-waypointstracksoutboundtrack'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpWaypointsTracksOutboundtrackStream
+                  - simple: ${body.key} == 'ofp-waypointstrackssegmenttrack'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpWaypointsTracksSegmenttrackStream
+                  - simple: ${body.key} == 'ofp-waypointstracksinboundtrack'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpWaypointsTracksInboundtrackStream
+                  - simple: ${body.key} == 'ofp-etopssummarycriticalpositions'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpEtopssummaryCriticalpositionsStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-etopssummarycriticalpositionssuitableairport'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpEtopssummaryCriticalpositionsSuitableairportStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-etopssummarycriticalpositionssuitableairporttracksoutboundtrack'
+                                  
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpEtopssummaryCriticalpositionsSuitableairportTracksOutboundtrackStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-etopssummarycriticalpositionssuitableairporttrackssegmenttrack'
+                                  
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpEtopssummaryCriticalpositionsSuitableairportTracksSegmenttrackStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-etopssummarycriticalpositionssuitableairporttracksinboundtrack'
+                                  
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpEtopssummaryCriticalpositionsSuitableairportTracksInboundtrackStream
+                  - simple: ${body.key} == 'ofp-etopssummaryadequateairports'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpEtopssummaryAdequateairportsStream
+                  - simple: ${body.key} == 'ofp-alternateroutes'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flightPlanVaultExtra:ofpAlternateRoutesStream
+                  - simple: ${body.key} == 'ofp-airportdatalist'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flightPlanVaultExtra:ofpAirportdatalistStream
+                  - simple: ${body.key} == 'ofp-airportdatalistterminalprocedure'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpAirportdatalistTerminalprocedureStream
+                  - simple: ${body.key} == 'ofp-melcdlitems'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flightPlanVaultExtra:ofpMelcdlItemsStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-alternateroutesalternateroutewaypoints'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpAlternateRoutesAlternateRouteWaypointsStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-alternaterouteswaypointsTracksOutboundTrack'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpAlternaterouteswaypointsTracksOutboundTrack
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-alternaterouteswaypointsTracksSegmentTrack'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpAlternaterouteswaypointsTracksSegmentTrack
+                  - simple: ${body.key} == 'ofp-alternatefuels'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flightPlanVaultFuel:ofpAlternatefuelsStream
+                      - uri: flightPlanFusion:ofpAlternatefuelsStream
+                  - simple: ${body.key} == 'ofp-fuelheaderremarks'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flightPlanVaultFuel:ofpFuelheaderRemarkStream
+                  - simple: ${body.key} == 'ofp-additionalfuels'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flightPlanVaultFuel:ofpAdditionalfuelsStream
+                      - uri: flightPlanFusion:ofpAdditionalfuelsStream
+                  - simple: ${body.key} == 'ofp-extrafuels'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flightPlanVaultFuel:ofpExtrafuelsStream
+                  - simple: ${body.key} == 'ofp-protectedcontfuelatdeparture'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultFuel:ofpProtectedContFuelatDepartureStream
+                  - simple: ${body.key} == 'ofp-basedestcontingencyfuel'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flightPlanVaultFuel:ofpBaseDestContingencyFuelStream
+                  - simple: ${body.key} == 'ofp-estimatedtimeofarrivalatera'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultFuel:ofpEstimatedTimeOfArrivalAtEraStream
+                  - simple: ${body.key} == 'ofp-fuelheaderadjustments'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flightPlanVaultFuel:ofpFuelheaderAdjustmentsStream
+                  - simple: ${body.key} == 'ofp-fuelheaderadjustmentsaffecteditems'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultFuel:ofpFuelheaderAdjustmentsAffecteditemsStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-fuelheaderadjustmentsaffecteditemsadjustment'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultFuel:ofpFuelheaderAdjustmentsAffecteditemsAdjustmentStream
+                  - simple: ${body.key} == 'ofp-contingencysavingalternatefuels'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultFuel:ofpContingencysavingAlternatefuelsStream
+                  - simple: ${body.key} == 'ofp-contingencysavingadditionalfuels'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultFuel:ofpContingencysavingAdditionalfuelsStream
+                  - simple: ${body.key} == 'ofp-contingencysavingextrafuels'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultFuel:ofpContingencysavingExtrafuelsStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-contingencysavingheaderfuelheaderadjustments'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultFuel:ofpContingencysavingheaderFuelheaderAdjustmentsStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-contingencysavingheaderfuelheaderadjustmentsaffecteditems'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultFuel:ofpContingencysavingheaderFuelheaderadjustmentsAffecteditemsStream
+                  - simple: |-
+                      ${body.key} ==
+                                    'ofp-contingencysavingheaderfuelheaderadjustmentsaffecteditemsadjustment'
+                                  
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultFuel:ofpContingencysavingheaderFuelheaderAdjustmentsAffecteditemsAdjustmentStream
+                  - simple: ${body.key} == 'ofp-contingencysavingheaderwaypoints'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpContingencysavingheaderWaypointsStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-contingencysavingheaderwaypointstracksoutboundtrack'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpContingencysavingheaderWaypointsTracksOutboundtrackStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-contingencysavingheaderwaypointstrackssegmenttrack'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpContingencysavingheaderWaypointsTracksSegmenttrackStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-contingencysavingheaderwaypointstracksinboundtrack'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpContingencysavingheaderWaypointsTracksInboundtrackStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-contingencysavingheaderalternateroutes'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpContingencysavingheaderAlternateroutesStream
+                  - simple: ${body.key} == 'ofp-fuelstatistics'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flightPlanVaultFuel:ofpFuelstatisticsStream
+                  - simple: ${body.key} == 'ofp-fuelstatisticsanalysedfuelvalue'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultFuel:ofpFuelstatisticsAnalysedfuelvalueStream
+                  - simple: ${body.key} == 'ofp-remarks'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flightPlanVaultExtra:ofpRemarkStream
+                  - simple: ${body.key} == 'ofp-waypointsremarks'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flightPlanVaultExtra:ofpWaypointsRemarkStream
+                  - simple: ${body.key} == 'ofp-etopssummaryremarks'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flightPlanVaultExtra:ofpEtopssummaryRemarkStream
+                  - simple: ${body.key} == 'ofp-melcdlitemsremarks'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flightPlanVaultExtra:ofpMelcdlItemsRemarkStream
+                  - simple: ${body.key} == 'ofp-weightheaderremarks'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: flightPlanVaultExtra:ofpWeightheaderRemarkStream
+                  - simple: ${body.key} == 'ofp-contingencysavingheaderremarks'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpContingencysavingheaderRemarkStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-contingencysavingheaderwaypointsremarks'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpContingencysavingheaderWaypointsRemarkStream
+                  - simple: ${body.key} == 'ofp-terrainclearancecriticalpoints'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpTerrainclearanceCriticalpointsStream
+                  - simple: ${body.key} == 'ofp-terrainclearancecriticalpointsremarks'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpTerrainclearanceCriticalpointsRemarksStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-terrainclearancecriticalpointsdiversionroutes'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpTerrainclearanceCriticalpointsDiversionroutesStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-terrainclearancecriticalpointsdiversionroutesremarks'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpTerrainclearanceCriticalpointsDiversionRoutesRemarksStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-terrainclearancecriticalpointsdiversionroutessafealtitudes'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpTerrainclearanceCriticalpointsDiversionroutesSafealtitudesStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-terrainclearancecriticalpointsdiversionrouteswaypoints'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpTerrainclearanceCriticalpointsDiversionroutesWaypointsStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-terrainclearancecriticalpointsdiversionroutewaypointremarks'
+                                  
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpTerrainclearanceCriticalpointsDiversionroutesWaypointsRemarksStream
+                  - simple: |-
+                      ${body.key} ==
+                                    'ofp-terrainclearancecriticalpointsdiversionrouteswaypointsoutboundtrack'
+                                  
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpTerrainclearanceCriticalpointsDiversionroutesWaypointsOutboundTrackStream
+                  - simple: |-
+                      ${body.key} ==
+                                    'ofp-terrainclearancecriticalpointsdiversionrouteswaypointssegmenttrack'
+                                  
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpTerrainclearanceCriticalpointsDiversionroutesWaypointsSegmentTrackStream
+                  - simple: |-
+                      ${body.key} ==
+                                    'ofp-terrainclearancecriticalpointsdiversionrouteswaypointsinboundtrack'
+                                  
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpTerrainclearanceCriticalpointsDiversionroutesWaypointsInboundTrackStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-additionaldataperformancetakeoffperformance'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpAdditionaldataperformancetakeoffperformanceStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-additionaldataperformancelandingperformance'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpAdditionaldataperformancelandingperformanceStream
+                  - simple: ${body.key} == 'ofp-miniofpcalculationadjustmentdeviation'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpMiniOfpcalCulationAdjustmentDeviationStream
+                  - simple: >-
+                      ${body.key} ==
+                      'ofp-miniofpcalculationadjustmentoperationalimpact'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: >-
+                          flightPlanVaultExtra:ofpMiniOfpcalCulationAdjustmentOperationalImpactStream
+                  - simple: ${body.key} == 'fpl'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: direct:telex
+                otherwise:
+                  - log:
+                      - message: reason=unhandled stream processing, data=${body.key}
+                        logName: flightplan-process
+                        loggingLevel: WARN
+- route:
+    id: atc-flightplan
+    from:
+      uri: direct:atc-flightplan
+      steps:
+        - process:
+            ref: ATCFlightPlan
+        - to:
+            uri: direct:elasticsearch7
+        - split:
+            simple: ${body}
+            choice:
+              - when:
+                  - simple: ${body.key} == 'afp'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: afpVault:afpStream
+                      - uri: afpFusion:afpStream
+                  - simple: ${body.key} == 'afp-atc-message-text'
+                    transform:
+                      - simple: ${body.value}
+                    to:
+                      - uri: afpVault:afpAtcMessageTextStream
+                otherwise:
+                  - log:
+                      - message: reason=unhandled stream processing, data=${body.key}
+                        logName: atc-flightplan
+                        loggingLevel: WARN
+- route:
+    id: privileged-transports
+    from:
+      uri: direct:privileged-transports
+      steps:
+        - setHeader:
+            name: source
+            constant: time:matters
+        - setHeader:
+            name: type
+            constant: privileged-transports
+        - setHeader:
+            name: index
+            constant: privileged-transports
+        - process:
+            ref: PrivilegedTransports
+        - to:
+            uri: direct:elasticsearch7
+        - to:
+            uri: privilegedTransports:privilegedTransportsStream
+        - to:
+            uri: direct:okResponse
+- route:
+    id: check-failed-flight-info-ald
+    from:
+      uri: flightInfoFusion:flightInfoStreamBaseDataCheckFailedALD
+      steps:
         - log:
-            message: "vrm stream done"
-            loggingLevel: "INFO"
+            message: >-
+              reason=could not match ICAO airline designator
+              (AIRLINE_DESIGNATOR), data=${body}
+            logName: check-failed-flight-info-ald
+            loggingLevel: WARN
 - route:
-    id: vrm_vendors
+    id: check-failed-flight-info-dep
     from:
-      uri: "direct:vrm_vendors"
+      uri: flightInfoFusion:flightInfoStreamBaseDataCheckFailedDEP
       steps:
-        - setHeader:
-            name: "CamelHttpMethod"
-            constant: ["GET"]
-        - setHeader:
-            name: "Authorization"
-            constant: ["Token {{VRM_TOKEN}}"]
-        - setHeader:
-            name: "Content-Type"
-            constant: ["csv"]
-        - removeHeader:
-            name: "Exchange.HTTP_URI"
-        - toD:
-            uri: "https://api.thirdpartytrust.com/api/downloads/connections/vendors"
-        - convertBodyTo:
-            type: "String"
-        - process:
-            ref: "VrmVendorsExtractor"
-        - to:
-            uri: "vrmPlan:vrm_vendor_stream"
         - log:
-            message: "vrm vendors stream done"
-            loggingLevel: "INFO"
+            message: >-
+              reason=could not match ICAO airport (DEPARTURE_AIRPORT),
+              data=${body}
+            logName: check-failed-flight-info-dep
+            loggingLevel: WARN
 - route:
-    id: vrmuuid
+    id: check-failed-flight-info-arr
     from:
-      uri: "direct:vrmuuid"
+      uri: flightInfoFusion:flightInfoStreamBaseDataCheckFailedARR
       steps:
-        - setHeader:
-            name: "CamelHttpMethod"
-            constant: ["GET"]
-        - setHeader:
-            name: "Authorization"
-            constant: ["Token {{VRM_TOKEN}}"]
-        - setHeader:
-            name: "Content-Type"
-            constant: ["application/json"]
-        - setHeader:
-            name: "Accept"
-            constant: ["application/json"]
-        - removeHeader:
-            name: "Exchange.HTTP_URI"
-        - toD:
-            uri: "https://api.thirdpartytrust.com/api/v3/connections/${exchange.getProperty('active')}/${exchange.getProperty('uuid')}"
-        - convertBodyTo:
-            type: "String"
-        - process:
-            ref: "VrmScoresExtractor"
-        - to:
-            uri: "vrmPlan:vrm_stream"
         - log:
-            message: "vrm stream done"
-            loggingLevel: "INFO"
+            message: >-
+              reason=could not match ICAO airport (SCHEDULED_ARRIVAL_AIRPORT),
+              data=${body}
+            logName: check-failed-flight-info-arr
+            loggingLevel: WARN
 - route:
-    id: local-testing
+    id: legsFusionFlightUpdate
     from:
-      uri: "timer://test?fixedRate=true&period=500000"
+      uri: flightUpdateFusion:flightUpdateStreamGeneralized
       steps:
         - to:
-            uri: "direct:cobase"
-        - log:
-            message: "ping"
-            loggingLevel: "INFO"
+            uri: legsFusion:flightUpdateStreamGeneralized
 - route:
-    id: initial_load
+    id: legsFusionFlightInfo
     from:
-      uri: "direct:initial_load"
+      uri: flightInfoFusion:flightInfoStreamGeneralized
       steps:
-        - multicast:
-            parallelProcessing: "false"
-            stopOnException: "false"
-            log: [{"$":{"message":"Starting initial load.","loggingLevel":"INFO"}},{"$":{"message":"Initial load completed.","loggingLevel":"INFO"}}]
-            to: [{"$":{"uri":"direct:start_busybox"}},{"$":{"uri":"direct:lpa-efb"}},{"$":{"uri":"direct:aerq"}},{"$":{"uri":"direct:lts"}},{"$":{"uri":"direct:edelweiss-intune"}},{"$":{"uri":"direct:air-dolomiti"}},{"$":{"uri":"direct:bitsight"}},{"$":{"uri":"direct:brussels"}},{"$":{"uri":"direct:techtree"}},{"$":{"uri":"direct:cityline"}},{"$":{"uri":"direct:delvag"}},{"$":{"uri":"direct:lcc"}},{"$":{"uri":"direct:leos"}},{"$":{"uri":"direct:datasource_names"}},{"$":{"uri":"direct:device42"}},{"$":{"uri":"direct:edelweiss"}},{"$":{"uri":"direct:eurowings"}},{"$":{"uri":"direct:itop"}},{"$":{"uri":"direct:jettainer"}},{"$":{"uri":"direct:leanix"}},{"$":{"uri":"direct:lht"}},{"$":{"uri":"direct:qip"}},{"$":{"uri":"direct:timematters"}},{"$":{"uri":"direct:timematters-csv"}},{"$":{"uri":"direct:rico"}},{"$":{"uri":"direct:snow"}},{"$":{"uri":"direct:swiss"}},{"$":{"uri":"direct:as-swiss"}},{"$":{"uri":"direct:qualys-kyndryl"}},{"$":{"uri":"direct:qualys-telekom"}},{"$":{"uri":"direct:zrh"}},{"$":{"uri":"direct:mmg"}},{"$":{"uri":"direct:super_update"}}]
+        - to:
+            uri: legsFusion:flightInfoStreamGeneralized
 - route:
-    id: list_minio
+    id: legsFusionFlightDetail
     from:
-      uri: "direct:list_minio"
+      uri: flightDetailFusion:flightDetailStreamGeneralized
+      steps:
+        - to:
+            uri: legsFusion:flightDetailStreamGeneralized
+- route:
+    id: flight
+    from:
+      uri: timer://checkUpdates?fixedRate=true&period=20000
+      steps:
+        - script:
+            groovy: |2-
+
+                        import java.sql.Timestamp
+
+                        exchange.in.headers.timestamp = System.currentTimeMillis()
+                        exchange.in.headers.NEW_DTS = new Timestamp(exchange.in.headers.timestamp)
+                      
+        - to:
+            uri: direct:fddc-flight-update
+        - to:
+            uri: direct:ofpDispatch
+- route:
+    id: dailyExports
+    from:
+      uri: quartz://dailyJobs?cron=0+25+0+*+*+?
+      steps:
+        - script:
+            groovy: |2-
+
+                        import java.sql.Timestamp
+                        headers["timestamp"] = System.currentTimeMillis()
+                        headers["todayLong"] = ((headers.timestamp / 86400000) * 86400000) as Long
+                        headers["todayLongMinus3"] = headers.todayLong - (3 * 86400000)
+                        headers["today"] = new Timestamp(headers.todayLong)
+                        headers["todayMinus3"] = new Timestamp(headers.todayLongMinus3)
+                        headers["firstJan1970"] = new Timestamp(0 as Long)
+                      
+        - transform:
+            constant: |2-
+
+                        UPDATE SUP_OFPXML_DISPATCH SET doc = NULL WHERE DISTRIBUTION_DTS < :?todayMinus3 AND DISTRIBUTION_DTS > :?firstJan1970
+                      
+        - to:
+            uri: jdbc:ofp-oracle?useHeadersAsParameters=true
+- route:
+    id: fddc-flight-update
+    errorHandlerRef: retry
+    from:
+      uri: direct:fddc-flight-update
       steps:
         - transform:
-            groovy: ["\n                io.minio.ListObjectsArgs.builder()\n                    .bucket(\"data\")\n                    .recursive(true)\n            "]
+            simple: resource:deploy:generating/flight.sql
         - to:
-            uri: "minio://data?endpoint={{MINIO_ENDPOINT}}&accessKey={{MINIO_ACCESS_KEY}}&secretKey={{MINIO_SECRET_KEY}}&operation=listObjects&pojoRequest=true"
+            uri: jdbc:mvt-oracle?useHeadersAsParameters=true
+        - to:
+            uri: legsFusion:llxUpdate
+        - to:
+            uri: legsFusion:lloUpdate
+        - to:
+            uri: legsFusion:update_distribution_dts
+        - split:
+            simple: ${body}
+            process:
+              - ref: Flight
+            split:
+              - simple: ${body}
+                log:
+                  - message: ${body}
+                    loggingLevel: INFO
+                    logName: trace.msg.flight.to.fddc
+                to:
+                  - uri: direct:espMsgWrapper
+                  - uri: '{{fddc.uri}}'
+- route:
+    id: ofpDispatch
+    from:
+      uri: direct:ofpDispatch
+      steps:
+        - transform:
+            simple: resource:deploy:generating/ofp.sql
+        - to:
+            uri: jdbc:ofp-oracle?useHeadersAsParameters=true
+        - to:
+            uri: ofpDispatch:update_distribution_dts
+        - split:
+            simple: ${body}
+            setHeader:
+              - name: ESP_FILE_NAME
+                groovy: |2-
 
+                              "${body.FLIGHT_DATE.format('yyyyMMdd')}${body.AIRLINE_DESIGNATOR}${body.FLIGHT_NUMBER}${body.OPERATIONAL_SUFFIX == ' ' ? '' : body.OPERATIONAL_SUFFIX}${body.DEPARTURE_AIRPORT}${body.SCHEDULED_ARRIVAL_AIRPORT}.xml"
+                            
+              - name: airline_designator
+                simple: ${body["AIRLINE_DESIGNATOR"]}
+              - name: aircraft_owner
+                simple: ${body["AIRCRAFT_OWNER"]}
+            transform:
+              - groovy: |2-
 
-- beans:
-    - constructors:
-        '0': resource:deploy:TechTreeProcessor.groovy
-      factoryBean: beanFactory
-      factoryMethod: createBean
-      name: TechTreeProcessor
-      properties:
-        dataSource: pspDataSource
-    - constructors:
-        '0': resource:deploy:QueryDB.groovy
-      factoryBean: beanFactory
-      factoryMethod: createBean
-      name: QueryDB
-      properties:
-        dataSource: pspDataSource
-    - constructors:
-        '0': resource:deploy:TechTreeAddressProcessor.groovy
-      factoryBean: beanFactory
-      factoryMethod: createBean
-      name: TechTreeAddressProcessor
-    - constructors:
-        '0': resource:deploy:VrmExtractor.groovy
-      factoryBean: beanFactory
-      factoryMethod: createBean
-      name: VrmExtractor
-      properties:
-        dataSource: pspDataSource
-    - constructors:
-        '0': resource:deploy:VrmScoresExtractor.groovy
-      factoryBean: beanFactory
-      factoryMethod: createBean
-      name: VrmScoresExtractor
-    - constructors:
-        '0': resource:deploy:VrmVendorsExtractor.groovy
-      factoryBean: beanFactory
-      factoryMethod: createBean
-      name: VrmVendorsExtractor
-      properties:
-        dataSource: pspDataSource
-    - constructors:
-      name: pspPlan
-      properties:
-        plan: resource:deploy:psp.siddhi
-    - constructors:
-      name: vrmPlan
-      properties:
-        plan: resource:deploy:vrm.siddhi
+                              exchange.in.body.DOC.getSubString(1, (int) exchange.in.body.DOC.length())
+                            
+            choice:
+              - when:
+                  - simple: ${header.airline_designator} == 'SN'
+                    transform:
+                      - simple: ${body}
+                    to:
+                      - uri: direct:ofpDispatch-sn
+                  - simple: ${header.aircraft_owner} == 'CL'
+                    transform:
+                      - simple: ${body}
+                    to:
+                      - uri: direct:ofpDispatch-cl
+                  - simple: >-
+                      ${header.airline_designator} == 'LH' &&
+                      ${header.aircraft_owner} != 'CL' &&
+                                    ${header.aircraft_owner} != 'YF'
+                                  
+                    transform:
+                      - simple: ${body}
+                    to:
+                      - uri: direct:ofpDispatch-lh
+                  - simple: ${header.airline_designator} == 'EW'
+                    transform:
+                      - simple: ${body}
+                    to:
+                      - uri: direct:ofpDispatch-ew
+                  - simple: ${header.aircraft_owner} == 'YF'
+                    transform:
+                      - simple: ${body}
+                    to:
+                      - uri: direct:ofpDispatch-yf
+                  - simple: ${header.airline_designator} == 'OS'
+                    transform:
+                      - simple: ${body}
+                    to:
+                      - uri: direct:ofpDispatch-os
+                  - simple: ${header.aircraft_owner} == 'EN'
+                    transform:
+                      - simple: ${body}
+                    to:
+                      - uri: direct:ofpDispatch-en
+- route:
+    id: ofpDispatch-sn
+    errorHandlerRef: retry
+    from:
+      uri: direct:ofpDispatch-sn
+      steps:
+        - log:
+            message: ${headers}
+            logName: trace.esp.honeywell.ofp.bel
+        - to:
+            uri: '{{honeywell.ofp.bel.uri}}'
+- route:
+    id: ofpDispatch-cl
+    errorHandlerRef: retry
+    from:
+      uri: direct:ofpDispatch-cl
+      steps:
+        - log:
+            message: ${headers}
+            logName: trace.esp.honeywell.ofp.clh
+        - to:
+            uri: '{{honeywell.ofp.clh.uri}}'
+- route:
+    id: ofpDispatch-lh
+    errorHandlerRef: retry
+    from:
+      uri: direct:ofpDispatch-lh
+      steps:
+        - log:
+            message: ${headers}
+            logName: trace.esp.honeywell.ofp.dlh
+        - to:
+            uri: '{{honeywell.ofp.dlh.uri}}'
+- route:
+    id: ofpDispatch-ew
+    errorHandlerRef: retry
+    from:
+      uri: direct:ofpDispatch-ew
+      steps:
+        - log:
+            message: ${headers}
+            logName: trace.esp.honeywell.ofp.ewg
+        - to:
+            uri: '{{honeywell.ofp.ewg.uri}}'
+- route:
+    id: ofpDispatch-yf
+    errorHandlerRef: retry
+    from:
+      uri: direct:ofpDispatch-yf
+      steps:
+        - log:
+            message: ${headers}
+            logName: trace.esp.honeywell.ofp.gec
+        - to:
+            uri: '{{honeywell.ofp.gec.uri}}'
+- route:
+    id: ofpDispatch-os
+    errorHandlerRef: retry
+    from:
+      uri: direct:ofpDispatch-os
+      steps:
+        - log:
+            message: ${headers}
+            logName: trace.esp.honeywell.ofp.aua
+        - to:
+            uri: '{{ge.ems.odw.aua.uri}}'
+- route:
+    id: ofpDispatch-en
+    errorHandlerRef: retry
+    from:
+      uri: direct:ofpDispatch-en
+      steps:
+        - log:
+            message: ${headers}
+            logName: trace.esp.honeywell.ofp.gec
+        - to:
+            uri: '{{honeywell.ofp.dla.uri}}'
+- route:
+    id: lnkLeg
+    from:
+      uri: legsFusion:lnkLegStream
+      steps:
+        - to:
+            uri: direct:assignFuel
+        - to:
+            uri: direct:assignEuc
+- route:
+    id: assignFuel
+    from:
+      uri: direct:assignFuel
+      steps:
+        - to:
+            uri: linkLeg:lnkLegFuel
+- route:
+    id: batchAssign
+    from:
+      uri: direct:batchAssign
+      steps:
+        - transform:
+            simple: |2-
+
+                        UPDATE BIZ_LEGS SET EUC_HK = NULL WHERE FLIGHT_DATE = '${headers.day}'
+                      
+        - transform:
+            simple: |2-
+
+                        select FLIGHT_DATE, AIRLINE_DESIGNATOR, FLIGHT_NUMBER, OPERATIONAL_SUFFIX, DEPARTURE_AIRPORT, LEG_STATE,
+                        REGISTRATION, SCHEDULED_ARRIVAL_AIRPORT
+                        FROM BIZ_LEGS WHERE FLIGHT_DATE = '${headers.day}' and LEG_STATE NOT IN ('DEL', 'CNL')
+                      
+        - transform:
+            constant: OK
+        - to:
+            uri: jdbc:mvt-oracle?useHeadersAsParameters=true
+        - to:
+            uri: jdbc:mvt-oracle?useHeadersAsParameters=true
+        - to:
+            uri: direct:assignEuc
+        - to:
+            uri: direct:assignFuel
+- route:
+    id: assignEuc
+    from:
+      uri: direct:assignEuc
+      steps:
+        - split:
+            simple: ${body}
+            script:
+              - groovy: |2-
+
+                              import java.sql.Timestamp
+                              headers["FLIGHT_DATE"] = body.FLIGHT_DATE
+                              headers["AIRLINE_DESIGNATOR"] = body.AIRLINE_DESIGNATOR
+                              headers["FLIGHT_NUMBER"] = body.FLIGHT_NUMBER
+                              headers["OPERATIONAL_SUFFIX"] = body.OPERATIONAL_SUFFIX
+                              headers["DEPARTURE_AIRPORT"] = body.DEPARTURE_AIRPORT
+                              headers["LEG_STATE"] = body.LEG_STATE
+                              headers["REGISTRATION"] = body.REGISTRATION
+                              headers["SCHEDULED_ARRIVAL_AIRPORT"] = body.SCHEDULED_ARRIVAL_AIRPORT
+                            
+            transform:
+              - simple: resource:deploy:generating/linkLegEuc.sql
+            to:
+              - uri: jdbc:mvt-oracle?useHeadersAsParameters=true
+              - uri: linkLeg:lnkLegEuc
+- route:
+    id: elasticsearch7
+    errorHandlerRef: retryForever
+    from:
+      uri: direct:elasticsearch7
+      steps:
+        - setProperty:
+            name: tmp
+            simple: ${body}
+        - process:
+            ref: OpsIndexRequest
+        - to:
+            uri: elasticsearch7://elasticsearch?operation=Index
+        - transform:
+            simple: ${exchangeProperty.tmp}
+        - removeProperty:
+            name: tmp
+- route:
+    id: okResponse
+    from:
+      uri: direct:okResponse
+      steps:
+        - setBody:
+            constant: OK
+        - removeHeaders:
+            pattern: CamelHttp*
+        - removeHeader:
+            name: message
+- route:
+    id: espMsgWrapper
+    from:
+      uri: direct:espMsgWrapper
+      steps:
+        - marshal:
+            base64:
+              - lineLength: '-1'
+                lineSeparator: ''
+        - setHeader:
+            name: Content-Type
+            constant: application/json; charset=utf-8
+        - setBody:
+            simple: |2-
+
+                        {"base64Text":"${body}","timeStamp":"${date:header.timestamp:yyyy-MM-dd'T'HH:mm:ss.SSSz}"}
+                      
