@@ -27,6 +27,7 @@ import * as exec from "./exec";
 import { TopologyView } from './topologyView';
 import YAML from 'yaml';
 import XmlReader from 'xml-reader';
+import xmlToYamlConverter from './converter-xty';
 
 const KARAVAN_LOADED = "karavan:loaded";
 
@@ -194,17 +195,25 @@ export function activate(context: ExtensionContext) {
 
     const xmlToYaml = commands.registerCommand('karavan.xty', (...args: any[]) => {
         const file = args[1][0];
-        if (!file) return window.showInformationMessage("No file selected!");
-        const xml_content = fs.readFileSync(file.path, "utf8");
-        const reader = XmlReader.create();
-        reader.on('done', (data: any) => {
-            const yamlString = utils.convertXmlNodeToYaml(data);
-            const pathArr = args[0].path.split("\/") as string[];
-            const fName = pathArr.at(-1)?.split('.').slice(0, -1).join('.') ?? Date.now().toString(16); //filename
-            const dir = pathArr.slice(0, -1).join('/'); // the directory the file is located in.
-            fs.writeFileSync(`${dir}/${fName}.yaml`, yamlString, { flag: 'w+' });
-        });
-        reader.parse(xml_content);
+        const pathArr = args[0].path.split("\/") as string[];
+        const fName = pathArr.at(-1)?.split('.').slice(0, -1).join('.') ?? Date.now().toString(16); //filename
+        const dir = pathArr.slice(0, -1).join('/'); // the directory the file is located in.
+
+        xmlToYamlConverter(file.path, `${dir}/${fName}.yaml`);
+
+
+        // const file = args[1][0];
+        // if (!file) return window.showInformationMessage("No file selected!");
+        // const xml_content = fs.readFileSync(file.path, "utf8");
+        // const reader = XmlReader.create();
+        // reader.on('done', (data: any) => {
+        //     const yamlString = utils.convertXmlNodeToYaml(data);
+        //     const pathArr = args[0].path.split("\/") as string[];
+        //     const fName = pathArr.at(-1)?.split('.').slice(0, -1).join('.') ?? Date.now().toString(16); //filename
+        //     const dir = pathArr.slice(0, -1).join('/'); // the directory the file is located in.
+        //     fs.writeFileSync(`${dir}/${fName}.yaml`, yamlString, { flag: 'w+' });
+        // });
+        // reader.parse(xml_content);
 
     });
     context.subscriptions.push(xmlToYaml);

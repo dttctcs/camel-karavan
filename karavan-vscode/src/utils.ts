@@ -665,6 +665,9 @@ export function removeRefByID(yamlObject: YamlLeaf, refId: string): YamlLeaf {
     return yamlObject;
 }
 
+
+
+//** DT TYPE DEFINITION
 export interface ReferenceRecord {
     id: string | undefined;
     ref: Partial<RahlaRef>
