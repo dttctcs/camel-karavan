@@ -1,6 +1,7 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
 const xml2js = require('xml2js');
+const xmljs = require('xml-js');
 
 // Load YAML data
 function loadYAML(filePath) {
@@ -8,11 +9,6 @@ function loadYAML(filePath) {
     return yaml.load(fileContents);
 }
 
-// Validate XML element name
-function isValidElementName(name) {
-    const regex = /^[a-zA-Z_][\w.\-]*$/;
-    return regex.test(name);
-}
 
 // Convert YAML data to XML format
 function convertYAMLToXML(yamlData) {
@@ -108,7 +104,8 @@ function convertYAMLToXML(yamlData) {
 
         if ('rest' in section) {
             const restElement = {
-                $: { path: section.rest.path || '' }
+                $: { id:section.rest.id ,
+                    path: section.rest.path || '' }
             };
 
             const httpMethods = ['get', 'post', 'put', 'delete', 'patch', 'options'];
@@ -136,6 +133,62 @@ function convertYAMLToXML(yamlData) {
             xmlData.blueprint.camelContext.rest.push(restElement);
         }
 
+        const processSteps = (steps, parentArray) => {
+            steps.forEach(step => {
+                const stepKey = Object.keys(step)[0];
+                let stepElement = { [stepKey]: { $: {}, children: [] } };
+
+                const expressionTypes = new Set([
+                    "constant", "simple", "groovy", "header", "java", "xpath", "xquery", "xtokenize",
+                    "jsonpath", "method", "mvel", "ognl", "python", "ref", "spel", "tokenize", "variable",
+                    "datasnonnet", "exchangeProperty"
+                ]);
+                Object.entries(step[stepKey]).forEach(([key, value]) => {
+
+                    if (key === 'steps' && Array.isArray(value)) {
+                        const otherProps = Object.entries(step[stepKey]).filter(([k, v]) => k !== 'steps');
+                        otherProps.forEach(([propKey, propValue]) => {
+                            // Check for expression in string values
+                            if (typeof propValue === 'string' && expressionTypes.has(propKey)) {
+                                stepElement[stepKey].children.push({ [propKey]: propValue });
+                                delete stepElement[stepKey].$
+                            }
+                        });
+
+                        processSteps(value, stepElement[stepKey].children);
+                    }
+
+                    else if (Array.isArray(value) && value.every(item => typeof item === 'object' && !Array.isArray(item))) {
+                        // Processing each object in the array, considering its attributes and nested structures
+                        value.forEach(item => {
+                            const childElement = { [key]: { $: {}, children: [] } };
+                            Object.entries(item).forEach(([itemKey, itemValue]) => {
+                                if (itemKey === 'steps' && Array.isArray(itemValue)) {
+                                    // Recursively handlinng nested 'steps'
+                                    processSteps(itemValue, childElement[key].children);
+                                } else if (typeof itemValue === 'object' && !Array.isArray(itemValue)) {
+                                    // Treat as a nested object within children
+                                    childElement[key].children.push({ [itemKey]: itemValue });
+                                } else {
+                                    // basically as attribute
+                                    childElement[key].children.push({ [itemKey]: itemValue });
+                                }
+                            });
+                            stepElement[stepKey].children.push(childElement);
+                        });
+                    } else if (typeof value === 'object' && !Array.isArray(value)) {
+                        stepElement[stepKey].children.push({ [key]: value });
+                    } else if (Array.isArray(value)) {
+                        // Handle arrays of primitives directly under the key
+                        stepElement[stepKey][key] = value;
+                    } else {
+                        // Handle primitive values as attributes
+                        stepElement[stepKey].$[key] = value;
+                    }
+                });
+                parentArray.push(stepElement);
+            });
+        };
         const routes = Array.isArray(section.route) ? section.route : [section.route];
         routes.forEach(routeObj => {
             if (routeObj) {
@@ -145,57 +198,54 @@ function convertYAMLToXML(yamlData) {
                     from: { $: { uri: route.from.uri } },
                     steps: []
                 };
-
-                const processSteps = (steps, parentArray) => {
-                    steps.forEach(step => {
-                        console.log("step", step);
-                        const stepKey = Object.keys(step)[0];
-                        const stepAttrs = { ...step[stepKey] };
-                        let stepElement = { [stepKey]: { $: stepAttrs } };
-
-                        if (stepAttrs.expression) {
-                            const expressionKey = Object.keys(stepAttrs.expression)[0];
-                            stepElement = {
-                                [stepKey]: {
-                                    $: { name: stepAttrs.name },
-                                    [expressionKey]: stepAttrs.expression[expressionKey].expression
-                                }
-                            };
-                            delete stepAttrs.expression;
-                        }
-
-                        if (step[stepKey].steps) {
-                            stepElement[stepKey].steps = [];
-                            processSteps(step[stepKey].steps, stepElement[stepKey].steps);
-                            delete stepElement[stepKey].$.steps;
-                        }
-
-                        parentArray.push(stepElement);
-                    });
-                };
-
-                const stepsArray = [];
-                processSteps(route.from.steps, stepsArray);
-                stepsArray.forEach(stepElement => {
-                    const stepKey = Object.keys(stepElement)[0];
-                    if (!routeElement[stepKey]) {
-                        routeElement[stepKey] = [];
-                    }
-                    routeElement[stepKey].push(stepElement[stepKey]);
-                });
-
+                processSteps(route.from.steps, routeElement.steps);
+                // Flatten the steps for the route element properly
+                routeElement.steps = flattenSteps(routeElement.steps);
                 xmlData.blueprint.camelContext.route.push(routeElement);
             }
         });
+
+        function flattenSteps(steps) {
+            const flattened = [];
+            steps.forEach(step => {
+                const stepKey = Object.keys(step)[0];
+                if (step[stepKey].children && step[stepKey].children.length > 0) {
+                    step[stepKey].children = flattenSteps(step[stepKey].children);
+                }
+
+                flattened.push(step);
+            });
+            return flattened;
+        }
     });
 
     return builder.buildObject(xmlData);
 }
 
-// Main execution
-const yamlData = loadYAML('yamlDsl.camel.yaml');
-let  xmlContent = convertYAMLToXML(yamlData);
-xmlContent = xmlContent.replace(/<steps>\n /g, '').replace(/<\/steps>\n /g, '');
 
-fs.writeFileSync('./converted_ops.xml', xmlContent, 'utf8');
+// Main execution
+let yamlData = loadYAML('yamlDsl.camel.yaml');
+let  xmlContent = convertYAMLToXML(yamlData);
+
+
+xmlContent = xmlContent.replace(/<steps>\n /g, '').replace(/<\/steps>\n /g, '');
+xmlContent = xmlContent.replace(/<children>\n /g, '').replace(/<\/children>\n /g, '');
+xmlContent = xmlContent.replace(/<item>\n /g, '').replace(/<\/item>\n /g, '');
+
+const regex = /<expression>\s*<([A-Za-z0-9]+)>\s*<expression>(.*?)<\/expression>\s*<\/\1>\s*<\/expression>/gs;
+xmlContent = xmlContent.replace(regex, '<$1>$2</$1>');
+
+
+
+function prefunct(xmlString) {
+    const jsObj = xmljs.xml2js(xmlString, { compact: false });
+    const options = { compact: false, spaces: 2 };
+    const prettyXML = xmljs.js2xml(jsObj, options);
+    return prettyXML;
+}
+
+// Example usage
+const prettyXML = prefunct(xmlContent);
+
+fs.writeFileSync('./converted_ops.xml', prettyXML, 'utf8');
 console.log('XML file has been created successfully.');
