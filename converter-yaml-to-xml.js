@@ -157,9 +157,8 @@ function convertYAMLToXML(yamlData) {
 
                         processSteps(value, stepElement[stepKey].children);
                     }
-
+                      //TODO FIX THE MARSHAL THING AND THE IDS REMOVAL !
                     else if (Array.isArray(value) && value.every(item => typeof item === 'object' && !Array.isArray(item))) {
-                        // Processing each object in the array, considering its attributes and nested structures
                         value.forEach(item => {
                             const childElement = { [key]: { $: {}, children: [] } };
                             Object.entries(item).forEach(([itemKey, itemValue]) => {
@@ -182,7 +181,6 @@ function convertYAMLToXML(yamlData) {
                         // Handle arrays of primitives directly under the key
                         stepElement[stepKey][key] = value;
                     } else {
-                        // Handle primitive values as attributes
                         stepElement[stepKey].$[key] = value;
                     }
                 });
@@ -243,9 +241,6 @@ function prefunct(xmlString) {
     const prettyXML = xmljs.js2xml(jsObj, options);
     return prettyXML;
 }
-
-// Example usage
 const prettyXML = prefunct(xmlContent);
-
 fs.writeFileSync('./converted_ops.xml', prettyXML, 'utf8');
 console.log('XML file has been created successfully.');

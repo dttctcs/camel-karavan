@@ -1,10 +1,3 @@
-// This converters aims to convert XML files like psp.xml (camel) or pain.xml to Yaml DSL that
-// The result is a yaml file that can generate a camel KARAVAN integration with it
-
-//Structure of this File :
-// For each ( route , rest , bean ..) There is two functions : 1) one To parse it from the file (e.g parseRoutes , parseBeans ..)
-// 2) take the extracted xml and convert to the yaml we want
-//  ps : it respects identation
 
 const yaml = require("js-yaml");
 const fs = require("fs");
@@ -25,16 +18,16 @@ function parseRests(xmlData) {
             if (childElement !== "$") {
               // '$' contains attributes of the rest element
               const children = Array.isArray(rest[childElement])
-                ? rest[childElement]
-                : [rest[childElement]];
+                  ? rest[childElement]
+                  : [rest[childElement]];
               for (const child of children) {
                 const childObj = {
                   tag: childElement,
                   attributes: child.$ || {},
                   description: child.description
-                    ? child.description[0].trim()
+                      ? child.description[0].trim()
 
-                    : "",
+                      : "",
                   to: child.to ? child.to[0].$.uri : "",
                 };
                 restObject.children.push(childObj);
@@ -96,13 +89,13 @@ function parseRoutes(xmlData) {
 
           for (const childElement in route) {
             if (
-              childElement !== "id" &&
-              childElement !== "$" &&
-              childElement !== "errorHandlerRef"
+                childElement !== "id" &&
+                childElement !== "$" &&
+                childElement !== "errorHandlerRef"
             ) {
               const children = Array.isArray(route[childElement])
-                ? route[childElement]
-                : [route[childElement]];
+                  ? route[childElement]
+                  : [route[childElement]];
               for (const child of children) {
                 routeObject.children.push({
                   tag: childElement,
@@ -128,6 +121,7 @@ function processChild(child, id) {
     "datasnonnet", "exchangeProperty"
   ]);
   const content = child.content || child;
+
   if (content?.["#name"] === "from" || (child.tag && child.tag !== "$$")) {
     return;
   }
@@ -137,19 +131,26 @@ function processChild(child, id) {
 
   // If there is a $ key, it means these are the attributes for this step
   if ("$" in content) {
-    yamlObject[name] = { ...content.$ };
-
+    console.log(content)
+    yamlObject[name] = {};
+    for (const attr in content.$) {
+      if (typeof content.$[attr] === 'object' && !Array.isArray(content.$[attr])) {
+        // Directly assign nested attributes as a single object without forming an array
+        yamlObject[name][attr] = { ...content.$[attr] };
+      } else {
+        // Handle non-object or array attributes normally
+        yamlObject[name][attr] = content.$[attr];
+      }
+    }
   } else if (content._) {
     yamlObject = content._;
-
-    }
-
-   else {
+  } else {
     yamlObject[name] = {};
   }
 
+
   // Put steps if it is a multicast or these
-  const shouldStep =  name === "multicast" || name === "when" || name === "split" || name === "otherwise" || name ===  "aggregate" || name ===  "doCatch" || name ===  "doFinally" || name === "doFinally" || name === "filter" || name === "idempotentConsumer" || name === "loop" || name === "resequence" || name === "step"  || name === "transacted" || name ==="marshal"   ;
+  const shouldStep =  name === "multicast"  || name === "when" || name === "split" || name === "otherwise" || name ===  "aggregate" || name ===  "doCatch" || name ===  "doFinally" || name === "doFinally" || name === "filter" || name === "idempotentConsumer" || name === "loop" || name === "resequence" || name === "step"  || name === "transacted"   ;
 
   // Manage the children recursively
 
@@ -168,7 +169,6 @@ function processChild(child, id) {
             if (yamlObject[name][childName]) {
               if (!Array.isArray(yamlObject[name][childName])) {
                 yamlObject[name][childName] = [yamlObject[name][childName]];
-                console.log(yamlObject)
               }
               yamlObject[name][childName].push(value);
             } else {
@@ -188,48 +188,54 @@ function processChild(child, id) {
 
           return;
         }
+
         // If the value has the same key as the child
         // E.g process:
         //       process:
         //         ref: TechTreeProcessor
         // Then remove the child key and put the value directly
+        // Adjust output to match expected structure
+
         if (value[childName]) {
+
 
           // If the value is already there, convert it to array
           if (yamlObject[name][childName]) {
+
             if (!Array.isArray(yamlObject[name][childName])) {
               yamlObject[name][childName] = [yamlObject[name][childName]];
             }
             yamlObject[name][childName].push(value[childName]);
             return;
           }
+
           yamlObject[name][childName] = [value[childName]];
           return;
         }
+
         yamlObject[name][childName] = value;
-        console.log(  value )
         if (yamlObject[name]) {
+
           for (const key of Object.keys(yamlObject[name])) {
-              if (expressionTypes.has(key)) {
-                  const expressionContent = yamlObject[name][key]._ || yamlObject[name][key] || "";
-                  console.log(yamlObject[name][key])
-                  const correctExpressionFormat = {
-                    name: yamlObject[name].name || undefined , // Retain the `name` from the existing object
-                      expression: {
-                          [key]: {  // 'key' might be 'constant', 'simple', etc.
-                              expression: expressionContent
-                          }
-                      }
-                  };
-                  console.log(correctExpressionFormat);
-                  yamlObject[name] = correctExpressionFormat;
-              }
+            if (expressionTypes.has(key)) {
+              const expressionContent = yamlObject[name][key]._ || yamlObject[name][key] || "";
+              const correctExpressionFormat = {
+                name: yamlObject[name].name || undefined , // Retain the `name` from the existing object
+                expression: {
+                  [key]: {  // 'key' might be 'constant', 'simple', etc.
+                    expression: expressionContent
+                  }
+                }
+              };
+              yamlObject[name] = correctExpressionFormat;
+            }
           }
+        }
       }
-      } else {
+      else {
         yamlObject[name][childName] = processChild(
-          childContent,
-          `${id}-${childName}`
+            childContent,
+            `${id}-${childName}`
         );
       }
     });
@@ -249,9 +255,9 @@ function routesToYAML(routes) {
         from: {
           uri: from.content.$.uri,
           steps: route.children
-            .filter((child) => child.tag !== "from")
-            .map((child) => processChild(child, route.id))
-            .filter((child) => child),
+              .filter((child) => child.tag !== "from")
+              .map((child) => processChild(child, route.id))
+              .filter((child) => child),
         },
       },
     };
@@ -282,13 +288,13 @@ function parseBeans(xmlData) {
       }
       if (bean.argument) {
         beanObject.arguments = bean.argument.map(
-          (argument) => argument.$.value
+            (argument) => argument.$.value
         );
       }
       if (bean.property) {
         beanObject.properties = bean.property.reduce((props, prop) => {
           props[prop.$.name] =
-            prop.$.ref !== undefined ? prop.$.ref : prop.$.value;
+              prop.$.ref !== undefined ? prop.$.ref : prop.$.value;
           return props;
         }, {});
       }
@@ -353,7 +359,7 @@ function parseRestConfiguration(xmlData) {
         // Extraction of attributes of restConfiguration element
         for (const attribute in restConfig.$) {
           restConfigurationObject.restConfiguration[attribute] =
-            restConfig.$[attribute];
+              restConfig.$[attribute];
         }
         // Extraction of child elements dynamically
         for (const childElementName in restConfig) {
@@ -361,15 +367,15 @@ function parseRestConfiguration(xmlData) {
             // Exclude attributes
             restConfigurationObject.restConfiguration[childElementName] = [];
             const childElements = Array.isArray(restConfig[childElementName])
-              ? restConfig[childElementName]
-              : [restConfig[childElementName]];
+                ? restConfig[childElementName]
+                : [restConfig[childElementName]];
             for (const childElement of childElements) {
               const childObj = {};
               for (const attribute in childElement.$) {
                 childObj[attribute] = childElement.$[attribute];
               }
               restConfigurationObject.restConfiguration[childElementName].push(
-                childObj
+                  childObj
               );
             }
           }
@@ -397,18 +403,18 @@ function sanitizeForYAML(str) {
       .replace(/\\/g, '\\\\');  // Escape backslashes
 }
 // Parse XML data
-//There is two parser because each parser treat data differently Routes have complex type
 function convert (file) {
 
-let xmlString = fs.readFileSync(file, "utf-8");
+  let xmlString = fs.readFileSync(file, "utf-8");
+//There is two parser because each parser treat data differently Routes have complex type
 
-const parser = new xml2js.Parser({
+  const parser = new xml2js.Parser({
 
-});
-const parser2 = new xml2js.Parser({
-  explicitChildren: true,
-  preserveChildrenOrder: true
-});
+  });
+  const parser2 = new xml2js.Parser({
+    explicitChildren: true,
+    preserveChildrenOrder: true
+  });
 
   parser.parseString(xmlString, (err, result) => {
     if (err) {
@@ -416,37 +422,37 @@ const parser2 = new xml2js.Parser({
       return;
     }
 
-        const beans = parseBeans(result);
-        let beansYaml = beansToYAML(beans);
-        beansYaml = "- " + yaml.dump(beansYaml);
-        if(beans.length){
-          beansYaml = sanitizeForYAML(beansYaml)
-          fs.writeFileSync("yamlDsl.camel.yaml", beansYaml, "utf8");}
-      else {
+    const beans = parseBeans(result);
+    let beansYaml = beansToYAML(beans);
+    beansYaml = "- " + yaml.dump(beansYaml);
+    if(beans.length){
+      beansYaml = sanitizeForYAML(beansYaml)
+      fs.writeFileSync("yamlDsl.camel.yaml", beansYaml, "utf8");}
+    else {
       fs.writeFileSync("yamlDsl.camel.yaml", "", "utf8");}
 
-       const refs = parseReference(result)
-       const Reference = yaml.dump(refs);
-       if (refs.length)
-       fs.appendFileSync("yamlDsl.camel.yaml", Reference, "utf8");
+    const refs = parseReference(result)
+    const Reference = yaml.dump(refs);
+    if (refs.length)
+      fs.appendFileSync("yamlDsl.camel.yaml", Reference, "utf8");
 
-       const restsconfig = parseRestConfiguration(result);
-       let restsconfigYaml = yaml.dump(restsconfig);
+    const restsconfig = parseRestConfiguration(result);
+    let restsconfigYaml = yaml.dump(restsconfig);
 
-       if(restsconfig.length){
-         restsconfigYaml = sanitizeForYAML(restsconfigYaml)
-         fs.appendFileSync("yamlDsl.camel.yaml", restsconfigYaml, "utf8");
+    if(restsconfig.length){
+      restsconfigYaml = sanitizeForYAML(restsconfigYaml)
+      fs.appendFileSync("yamlDsl.camel.yaml", restsconfigYaml, "utf8");
 
-       }
+    }
 
 
-       const rests = parseRests(result);
-       let restsYaml = restsToYAML(rests);
-       restsYaml = yaml.dump(restsYaml);
-       if(rests.length) {
-         restsYaml = sanitizeForYAML(restsYaml)
-         fs.appendFileSync("yamlDsl.camel.yaml", restsYaml, "utf8");
-       }
+    const rests = parseRests(result);
+    let restsYaml = restsToYAML(rests);
+    restsYaml = yaml.dump(restsYaml);
+    if(rests.length) {
+      restsYaml = sanitizeForYAML(restsYaml)
+      fs.appendFileSync("yamlDsl.camel.yaml", restsYaml, "utf8");
+    }
 
   });
   parser2.parseString(xmlString, (err, result) => {
@@ -458,13 +464,17 @@ const parser2 = new xml2js.Parser({
     const routes = parseRoutes(result);
     let routesYaml = routesToYAML(routes);
     routesYaml = yaml.dump(routesYaml);
+    const regex = /(\s+)(\w+):\n\s+- (\w+): (.*)\n\s+(\w+): (.*)/g;
+
+    const replacement = `$1$2: $1  $3: $4 $1  $5: $6`;
+    routesYaml = routesYaml.replace(regex, replacement);
     if(routes.length) //so we wont have empty lists [] if we ever didnt have routes ,same for beans ..refs .. etc
       routesYaml = sanitizeForYAML(routesYaml)
     fs.appendFileSync("yamlDsl.camel.yaml", routesYaml, "utf8");
   });
-return console.log("done")
+  return console.log("done")
 }
 
 
-convert("converted_ops.xml");
+convert("ops.xml");
 
