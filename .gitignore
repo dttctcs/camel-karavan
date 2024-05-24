@@ -55,7 +55,7 @@ yarn-error.log*
 *.jar
 
 **/*.tgz
-**/*.vsix
+# **/*.vsix
 **/*.bak
 
 .quinoa/
