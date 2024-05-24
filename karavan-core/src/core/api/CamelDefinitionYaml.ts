@@ -277,7 +277,6 @@ export class CamelDefinitionYaml {
         try {
             const fromYaml: any = yaml.load(text);
             const camelized: any = CamelUtil.camelizeObject(fromYaml);
-            console.log('cml', camelized)
             if (camelized?.apiVersion && camelized.apiVersion.startsWith('camel.apache.org') && camelized.kind) {
                 if (camelized.kind === 'Integration') {
                     return 'crd';
@@ -302,25 +301,25 @@ export class CamelDefinitionYaml {
         flows.filter((e: any) => e.hasOwnProperty('route'))
             .forEach((f: any) => result.push(CamelDefinitionYamlStep.readRouteDefinition(f.route)));
         flows.filter((e: any) => e.hasOwnProperty('from'))
-            .forEach((f: any) =>  result.push(CamelDefinitionYamlStep.readRouteDefinition(new RouteDefinition({from: f.from}))));
+            .forEach((f: any) => result.push(CamelDefinitionYamlStep.readRouteDefinition(new RouteDefinition({ from: f.from }))));
         flows.filter((e: any) => e.hasOwnProperty('beans'))
             .forEach((b: any) => result.push(CamelDefinitionYaml.readBeanDefinition(b)));
         flows.filter((e: any) => e.hasOwnProperty('routeConfiguration'))
             .forEach((e: any) => result.push(CamelDefinitionYamlStep.readRouteConfigurationDefinition(e.routeConfiguration)));
         flows.filter((e: any) => e.hasOwnProperty('errorHandler'))
-            .forEach((f: any) =>  result.push(CamelDefinitionYamlStep.readRouteConfigurationDefinition(new RouteConfigurationDefinition({errorHandler: f.errorHandler}))));
+            .forEach((f: any) => result.push(CamelDefinitionYamlStep.readRouteConfigurationDefinition(new RouteConfigurationDefinition({ errorHandler: f.errorHandler }))));
         flows.filter((e: any) => e.hasOwnProperty('onException'))
-            .forEach((f: any) =>  result.push(CamelDefinitionYamlStep.readRouteConfigurationDefinition(new RouteConfigurationDefinition({onException: f.onException}))));
+            .forEach((f: any) => result.push(CamelDefinitionYamlStep.readRouteConfigurationDefinition(new RouteConfigurationDefinition({ onException: f.onException }))));
         flows.filter((e: any) => e.hasOwnProperty('intercept'))
-            .forEach((f: any) =>  result.push(CamelDefinitionYamlStep.readRouteConfigurationDefinition(new RouteConfigurationDefinition({intercept: f.intercept}))));
+            .forEach((f: any) => result.push(CamelDefinitionYamlStep.readRouteConfigurationDefinition(new RouteConfigurationDefinition({ intercept: f.intercept }))));
         flows.filter((e: any) => e.hasOwnProperty('interceptFrom'))
-            .forEach((f: any) =>  result.push(CamelDefinitionYamlStep.readRouteConfigurationDefinition(new RouteConfigurationDefinition({interceptFrom: f.interceptFrom}))));
+            .forEach((f: any) => result.push(CamelDefinitionYamlStep.readRouteConfigurationDefinition(new RouteConfigurationDefinition({ interceptFrom: f.interceptFrom }))));
         flows.filter((e: any) => e.hasOwnProperty('interceptSendToEndpoint'))
-            .forEach((f: any) =>  result.push(CamelDefinitionYamlStep.readRouteConfigurationDefinition(new RouteConfigurationDefinition({interceptSendToEndpoint: f.interceptSendToEndpoint}))));
+            .forEach((f: any) => result.push(CamelDefinitionYamlStep.readRouteConfigurationDefinition(new RouteConfigurationDefinition({ interceptSendToEndpoint: f.interceptSendToEndpoint }))));
         flows.filter((e: any) => e.hasOwnProperty('onCompletion'))
-            .forEach((f: any) =>  result.push(CamelDefinitionYamlStep.readRouteConfigurationDefinition(new RouteConfigurationDefinition({onCompletion: f.onCompletion}))));
+            .forEach((f: any) => result.push(CamelDefinitionYamlStep.readRouteConfigurationDefinition(new RouteConfigurationDefinition({ onCompletion: f.onCompletion }))));
         flows.filter((e: any) => e.hasOwnProperty('reference'))
-            .forEach((f: any) =>  result.push(CamelDefinitionYamlStep.readReferenceConfigurationDefinition(new ReferenceConfigurationDefinition(f.reference))));
+            .forEach((f: any) => result.push(CamelDefinitionYamlStep.readReferenceConfigurationDefinition(new ReferenceConfigurationDefinition(f.reference))));
 
         return result;
     };
