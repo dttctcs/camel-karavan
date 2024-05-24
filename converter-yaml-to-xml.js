@@ -3,14 +3,12 @@ const yaml = require('js-yaml');
 const xml2js = require('xml2js');
 const xmljs = require('xml-js');
 
-// Load YAML data
 function loadYAML(filePath) {
     const fileContents = fs.readFileSync(filePath, 'utf8');
     return yaml.load(fileContents);
 }
 
 
-// Convert YAML data to XML format
 function convertYAMLToXML(yamlData) {
     const builder = new xml2js.Builder({
         xmldec: { version: '1.0', encoding: 'UTF-8', standalone: null },
@@ -137,56 +135,74 @@ function convertYAMLToXML(yamlData) {
             steps.forEach(step => {
                 const stepKey = Object.keys(step)[0];
                 let stepElement = { [stepKey]: { $: {}, children: [] } };
-
                 const expressionTypes = new Set([
                     "constant", "simple", "groovy", "header", "java", "xpath", "xquery", "xtokenize",
                     "jsonpath", "method", "mvel", "ognl", "python", "ref", "spel", "tokenize", "variable",
                     "datasnonnet", "exchangeProperty"
                 ]);
+                
+                // Iterate through each property in the current step
                 Object.entries(step[stepKey]).forEach(([key, value]) => {
 
                     if (key === 'steps' && Array.isArray(value)) {
-                        const otherProps = Object.entries(step[stepKey]).filter(([k, v]) => k !== 'steps');
-                        otherProps.forEach(([propKey, propValue]) => {
-                            // Check for expression in string values
-                            if (typeof propValue === 'string' && expressionTypes.has(propKey)) {
-                                stepElement[stepKey].children.push({ [propKey]: propValue });
-                                delete stepElement[stepKey].$
+                        processSteps(value, stepElement[stepKey].children);
+                    } else if (typeof value === 'object' && !Array.isArray(value)) {
+
+                        if (value.steps && Array.isArray(value.steps)) {
+                            // Special handling for nested steps within objects
+                            const nestedStepElement = { [key]: { $: {}, children: [] } };
+                            processSteps(value.steps, nestedStepElement[key].children);
+                            stepElement[stepKey].children.push(nestedStepElement);
+                        } else {
+                            // General handling for nested objects
+                            processNestedObjects(value, stepElement[stepKey].children, key);
+                        }
+                    } else if (Array.isArray(value)) {
+
+                        value.forEach(item => {
+
+                            if (typeof item === 'object' && !Array.isArray(item)) {
+                                const childElement = processNestedObjects(item , [], key);
+                                stepElement[stepKey].children.push(childElement);
+                            } else {
+                                // Directly handle primitive values in arrays
+                                stepElement[stepKey].children.push({ [key]: item });
                             }
                         });
-
-                        processSteps(value, stepElement[stepKey].children);
-                    }
-                      //TODO FIX THE MARSHAL THING AND THE IDS REMOVAL !
-                    else if (Array.isArray(value) && value.every(item => typeof item === 'object' && !Array.isArray(item))) {
-                        value.forEach(item => {
-                            const childElement = { [key]: { $: {}, children: [] } };
-                            Object.entries(item).forEach(([itemKey, itemValue]) => {
-                                if (itemKey === 'steps' && Array.isArray(itemValue)) {
-                                    // Recursively handlinng nested 'steps'
-                                    processSteps(itemValue, childElement[key].children);
-                                } else if (typeof itemValue === 'object' && !Array.isArray(itemValue)) {
-                                    // Treat as a nested object within children
-                                    childElement[key].children.push({ [itemKey]: itemValue });
-                                } else {
-                                    // basically as attribute
-                                    childElement[key].children.push({ [itemKey]: itemValue });
-                                }
-                            });
-                            stepElement[stepKey].children.push(childElement);
-                        });
-                    } else if (typeof value === 'object' && !Array.isArray(value)) {
-                        stepElement[stepKey].children.push({ [key]: value });
-                    } else if (Array.isArray(value)) {
-                        // Handle arrays of primitives directly under the key
-                        stepElement[stepKey][key] = value;
-                    } else {
+                    }  else {
                         stepElement[stepKey].$[key] = value;
                     }
+                
                 });
                 parentArray.push(stepElement);
             });
         };
+        
+        const processNestedObjects = (object, childrenArray, objectKey) => {
+            const element = { [objectKey]: { $: {}, children: [] } };
+            Object.entries(object).forEach(([key, value]) => {
+                if (typeof value === 'object' && !Array.isArray(value)) {
+                    if (value.steps && Array.isArray(value.steps)) {
+                        processSteps(value.steps, element[objectKey].children);
+                    } else {
+                        processNestedObjects(value, element[objectKey].children, key);
+                    }
+                } else if (Array.isArray(value)) {
+                    value.forEach(subItem => {
+                        if (typeof subItem === 'object') {
+                            processNestedObjects(subItem, element[objectKey].children, key);
+                        } else {
+                            element[objectKey].children.push({ [key]: subItem });
+                        }
+                    });
+                } else {
+                    element[objectKey].$[key] = value;
+                }
+            });
+            childrenArray.push(element);
+            return element;
+        };
+        
         const routes = Array.isArray(section.route) ? section.route : [section.route];
         routes.forEach(routeObj => {
             if (routeObj) {
@@ -197,13 +213,14 @@ function convertYAMLToXML(yamlData) {
                     steps: []
                 };
                 processSteps(route.from.steps, routeElement.steps);
-                // Flatten the steps for the route element properly
                 routeElement.steps = flattenSteps(routeElement.steps);
                 xmlData.blueprint.camelContext.route.push(routeElement);
             }
         });
 
         function flattenSteps(steps) {
+      
+
             const flattened = [];
             steps.forEach(step => {
                 const stepKey = Object.keys(step)[0];
@@ -221,19 +238,40 @@ function convertYAMLToXML(yamlData) {
 }
 
 
-// Main execution
-let yamlData = loadYAML('yamlDsl.camel.yaml');
-let  xmlContent = convertYAMLToXML(yamlData);
 
 
-xmlContent = xmlContent.replace(/<steps>\n /g, '').replace(/<\/steps>\n /g, '');
-xmlContent = xmlContent.replace(/<children>\n /g, '').replace(/<\/children>\n /g, '');
-xmlContent = xmlContent.replace(/<item>\n /g, '').replace(/<\/item>\n /g, '');
+function cleanIds(data) {
+    const idRegex = /-\b[0-9a-f]{4}\b$/;  
+    if (Array.isArray(data)) {
+        data.forEach(item => cleanIds(item));
+    } else if (typeof data === 'object' && data !== null) {
+        Object.keys(data).forEach(key => {
+            if (key === 'id' && typeof data[key] === 'string' && idRegex.test(data[key])) {
+                delete data[key]; // Remove the autogenerated ID
+            } else if (typeof data[key] === 'object') {
+                cleanIds(data[key]);
+            }
+        });
+    }
+}
 
-const regex = /<expression>\s*<([A-Za-z0-9]+)>\s*<expression>(.*?)<\/expression>\s*<\/\1>\s*<\/expression>/gs;
-xmlContent = xmlContent.replace(regex, '<$1>$2</$1>');
-
-
+function adjustUriAndRemoveParameters(data) {
+    if (Array.isArray(data)) {
+        data.forEach(item => adjustUriAndRemoveParameters(item));
+    } else if (typeof data === 'object' && data !== null) {
+        Object.keys(data).forEach(key => {
+            if (data[key] && typeof data[key] === 'object' && data[key].uri && data[key].parameters) {
+                Object.keys(data[key].parameters).forEach(param => {
+                    data[key].uri += `:${(data[key].parameters[param])}`;
+                });
+                delete data[key].parameters;
+            }
+            if (typeof data[key] === 'object') {
+                adjustUriAndRemoveParameters(data[key]);
+            }
+        });
+    }
+}
 
 function prefunct(xmlString) {
     const jsObj = xmljs.xml2js(xmlString, { compact: false });
@@ -241,6 +279,34 @@ function prefunct(xmlString) {
     const prettyXML = xmljs.js2xml(jsObj, options);
     return prettyXML;
 }
+
+
+
+function ConvertyamltoXMl (file) {
+let yamlData = loadYAML(file);
+
+adjustUriAndRemoveParameters(yamlData); 
+cleanIds(yamlData);
+
+let  xmlContent = convertYAMLToXML(yamlData);
+
+
+xmlContent = xmlContent.replace(/<steps>\n /g, '').replace(/<\/steps>\n /g, '');
+xmlContent = xmlContent.replace(/<children>\n /g, '').replace(/<\/children>\n /g, '');
+xmlContent = xmlContent.replace(/<item>\n /g, '').replace(/<\/item>\n /g, '');
+const regex = /<expression>\s*<([A-Za-z0-9]+) expression="([^"]+)".*?\/>\s*<\/expression>/gs;
+
+xmlContent = xmlContent.replace(regex, '<$1>$2</$1>');
+
+
 const prettyXML = prefunct(xmlContent);
+
 fs.writeFileSync('./converted_ops.xml', prettyXML, 'utf8');
-console.log('XML file has been created successfully.');
+
+}
+
+
+
+ConvertyamltoXMl("yamlDsl.camel.yaml");
+
+console.log('done vice verca.');
