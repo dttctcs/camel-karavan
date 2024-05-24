@@ -488,8 +488,6 @@ function convert(file: string, output: string) {
             return;
         }
 
-        fs.writeFileSync("./camel.json", JSON.stringify(result, null, 2), "utf8");
-
         const routes = parseRoutes(result);
         let routesYaml = routesToYAML(routes);
         routesYaml = yaml.dump(routesYaml);
