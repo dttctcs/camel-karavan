@@ -490,6 +490,7 @@ function convert(file: string, output: string) {
 
         const routes = parseRoutes(result);
         let routesYaml = routesToYAML(routes);
+        processNode(routesYaml);
         routesYaml = yaml.dump(routesYaml);
         if (routes.length)
             //so we wont have empty lists [] if we ever didnt have routes ,same for beans ..refs .. etc
@@ -497,6 +498,24 @@ function convert(file: string, output: string) {
         fs.appendFileSync(output, routesYaml, "utf8");
     });
     // return console.log("done");
+}
+
+function processNode(node) {
+    if (Array.isArray(node)) {
+        node.forEach(processNode);
+    } else if (typeof node === 'object' && node !== null) {
+        Object.keys(node).forEach(key => {
+            if (key === 'uri') {
+                let uriParts = node[key].split(':');
+                if (uriParts.length > 1 && uriParts[0] !== 'direct' && uriParts[0] !== 'minio') {
+                    node['uri'] = uriParts[0];
+                    node['parameters'] = { name: uriParts[1] }; // Assume uri has exactly two parts
+                }
+            } else if (typeof node[key] === 'object') {
+                processNode(node[key]);
+            }
+        });
+    }
 }
 
 // convert("ops.xml");
