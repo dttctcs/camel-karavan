@@ -28,6 +28,7 @@ import { TopologyView } from './topologyView';
 import YAML from 'yaml';
 import XmlReader from 'xml-reader';
 import xmlToYamlConverter from './converter-xty';
+import ConvertyamltoXMl from './converter-ytx';
 
 const KARAVAN_LOADED = "karavan:loaded";
 
@@ -180,15 +181,19 @@ export function activate(context: ExtensionContext) {
         const file = args[1][0];
         if (!file) return window.showInformationMessage("No file selected!");
 
-        const yaml_obj = utils.parseYamlFile(file.path);
-        if (!yaml_obj) window.showInformationMessage("Error: failed to parse the yaml file.");
-        else {
-            const xmlString = utils.yamlObjToXML(yaml_obj);
-            const pathArr = args[0].path.split("\/") as string[];
-            const fName = pathArr.at(-1)?.split('.').slice(0, -1).join('.') ?? Date.now().toString(16);
-            const dir = pathArr.slice(0, -1).join('/');
-            fs.writeFileSync(`${dir}/${fName}.xml`, xmlString, { flag: 'w+' });
-        }
+        const pathArr = args[0].path.split("\/") as string[];
+        const fName = pathArr.at(-1)?.split('.').slice(0, -1).join('.') ?? Date.now().toString(16);
+        const dir = pathArr.slice(0, -1).join('/');
+        ConvertyamltoXMl(file.path, `${dir}/${fName}.xml`);
+        // const yaml_obj = utils.parseYamlFile(file.path);
+        // if (!yaml_obj) window.showInformationMessage("Error: failed to parse the yaml file.");
+        // else {
+        //     const xmlString = utils.yamlObjToXML(yaml_obj);
+        //     const pathArr = args[0].path.split("\/") as string[];
+        //     const fName = pathArr.at(-1)?.split('.').slice(0, -1).join('.') ?? Date.now().toString(16);
+        //     const dir = pathArr.slice(0, -1).join('/');
+        //     fs.writeFileSync(`${dir}/${fName}.xml`, xmlString, { flag: 'w+' });
+        // }
 
     });
     context.subscriptions.push(yamlToXML);
@@ -199,8 +204,7 @@ export function activate(context: ExtensionContext) {
         const fName = pathArr.at(-1)?.split('.').slice(0, -1).join('.') ?? Date.now().toString(16); //filename
         const dir = pathArr.slice(0, -1).join('/'); // the directory the file is located in.
 
-        xmlToYamlConverter(file.path, `${dir}/${fName}.yaml`);
-
+        xmlToYamlConverter(file.path, `${dir}/${fName}.camel.yaml`);
 
         // const file = args[1][0];
         // if (!file) return window.showInformationMessage("No file selected!");

@@ -1,11 +1,4 @@
-// @ts-nocheck
-// This converters aims to convert XML files like psp.xml (camel) or pain.xml to Yaml DSL that
-// The result is a yaml file that can generate a camel KARAVAN integration with it
-//Structure of this File :
-// For each ( route , rest , bean ..) There is two functions : 1) one To parse it from the file (e.g parseRoutes , parseBeans ..)
-// 2) take the extracted xml and convert to the yaml we want
-//  ps : it respects identation
-
+//@ts-nocheck
 import yaml from 'js-yaml';
 import * as fs from 'fs';
 import xml2js from 'xml2js';
@@ -33,7 +26,6 @@ function parseRests(xmlData) {
                                     attributes: child.$ || {},
                                     description: child.description
                                         ? child.description[0].trim()
-
                                         : "",
                                     to: child.to ? child.to[0].$.uri : "",
                                 };
@@ -120,8 +112,31 @@ function parseRoutes(xmlData) {
     return routes;
 }
 
+const expressionTypes = new Set([
+    "constant",
+    "simple",
+    "groovy",
+    "header",
+    "java",
+    "xpath",
+    "xquery",
+    "xtokenize",
+    "jsonpath",
+    "method",
+    "mvel",
+    "ognl",
+    "python",
+    "ref",
+    "spel",
+    "tokenize",
+    "variable",
+    "datasnonnet",
+    "exchangeProperty",
+]);
+
 function processChild(child, id) {
     const content = child.content || child;
+
     if (content?.["#name"] === "from" || (child.tag && child.tag !== "$$")) {
         return;
     }
@@ -131,18 +146,43 @@ function processChild(child, id) {
 
     // If there is a $ key, it means these are the attributes for this step
     if ("$" in content) {
-        yamlObject[name] = { ...content.$ };
+        // console.log(content);
+        yamlObject[name] = {};
+        for (const attr in content.$) {
+            if (
+                typeof content.$[attr] === "object" &&
+                !Array.isArray(content.$[attr])
+            ) {
+                // Directly assign nested attributes as a single object without forming an array
+                yamlObject[name][attr] = { ...content.$[attr] };
+            } else {
+                // Handle non-object or array attributes normally
+                yamlObject[name][attr] = content.$[attr];
+            }
+        }
 
     } else if (content._) {
         yamlObject = content._;
-
-
     } else {
         yamlObject[name] = {};
     }
 
     // Put steps if it is a multicast or these
-    const shouldStep = name === "multicast" || name === "when" || name === "split" || name === "otherwise" || name === "aggregate" || name === "doCatch" || name === "doFinally" || name === "doFinally" || name === "filter" || name === "idempotentConsumer" || name === "loop" || name === "resequence" || name === "step" || name === "transacted";
+    const shouldStep =
+        name === "multicast" ||
+        name === "when" ||
+        name === "split" ||
+        name === "otherwise" ||
+        name === "aggregate" ||
+        name === "doCatch" ||
+        name === "doFinally" ||
+        name === "doFinally" ||
+        name === "filter" ||
+        name === "idempotentConsumer" ||
+        name === "loop" ||
+        name === "resequence" ||
+        name === "step" ||
+        name === "transacted";
 
     // Manage the children recursively
 
@@ -157,6 +197,7 @@ function processChild(child, id) {
 
 
                 if (shouldStep) {
+
                     // probably can cause bug, but i don't know where
                     // If it does, try to remove this if, but the xpath on when will not work
                     if (typeof value === "string") {
@@ -169,25 +210,31 @@ function processChild(child, id) {
                             // This is the first entry, assign it directly
 
                             yamlObject[name][childName] = value;
-                        } return;
+                        }
+                        return;
                     }
-                    // Outdated comment
                     // If it is a string, create an object with childName as key
                     if (!yamlObject[name].steps) {
                         yamlObject[name].steps = [];
                     }
-                    const givenValue = typeof value === "string" ? { [childName]: value } : value;
+                    const givenValue =
+                        typeof value === "string" ? { [childName]: value } : value;
                     yamlObject[name].steps.push(givenValue);
+
                     return;
                 }
-
 
                 // If the value has the same key as the child
                 // E.g process:
                 //       process:
                 //         ref: TechTreeProcessor
                 // Then remove the child key and put the value directly
+                // Adjust output to match expected structure
+
+
+
                 if (value[childName]) {
+
                     // If the value is already there, convert it to array
                     if (yamlObject[name][childName]) {
                         if (!Array.isArray(yamlObject[name][childName])) {
@@ -197,12 +244,38 @@ function processChild(child, id) {
                         return;
                     }
 
-                    yamlObject[name][childName] = [value[childName]];
+                    //! HARD CODED FOR OTHERWISE AND WHEN, always add ARRAY by default
+                    yamlObject[name][childName] = value[childName];
+                    if (childName === "when") {
+                        yamlObject[name][childName] = [value[childName]];
+                    }
+                    else if (childName === "otherwise") {
+                        yamlObject[name][childName] = value[childName];
+
+
+                    }
                     return;
                 }
 
-
                 yamlObject[name][childName] = value;
+                if (yamlObject[name]) {
+                    for (const key of Object.keys(yamlObject[name])) {
+                        if (expressionTypes.has(key)) {
+                            const expressionContent =
+                                yamlObject[name][key]._ || yamlObject[name][key] || "";
+                            const correctExpressionFormat = {
+                                name: yamlObject[name].name || undefined, // Retain the `name` from the existing object
+                                expression: {
+                                    [key]: {
+                                        // 'key' might be 'constant', 'simple', etc.
+                                        expression: expressionContent,
+                                    },
+                                },
+                            };
+                            yamlObject[name] = correctExpressionFormat;
+                        }
+                    }
+                }
             } else {
                 yamlObject[name][childName] = processChild(
                     childContent,
@@ -302,7 +375,9 @@ function beansToYAML(beans) {
 function parseReference(xmlData) {
     const refs = [];
     if (xmlData.blueprint && xmlData.blueprint.reference) {
-        const references = Array.isArray(xmlData.blueprint.reference) ? xmlData.blueprint.reference : [xmlData.blueprint.reference];
+        const references = Array.isArray(xmlData.blueprint.reference)
+            ? xmlData.blueprint.reference
+            : [xmlData.blueprint.reference];
 
         for (const reference of references) {
             const referenceObj = {
@@ -315,8 +390,6 @@ function parseReference(xmlData) {
     }
     return refs;
 }
-
-
 
 function parseRestConfiguration(xmlData) {
     const restConfigurations = [];
@@ -358,16 +431,16 @@ function parseRestConfiguration(xmlData) {
     return restConfigurations;
 }
 
-
-
+function sanitizeForYAML(str) {
+    return str
+        .replace(/&/g, "&amp;") // Encode ampersands
+}
 // Parse XML data
-//There is two parser because each parser treat data differently Routes have complex type
-function convert(xmlFile: string, targetYaml: string) {
+function convert(file: string, output: string) {
+    let xmlString = fs.readFileSync(file, "utf-8");
+    //There is two parser because each parser treat data differently Routes have complex type
 
-    console.log('reading xml: ', xmlFile);
-    console.log('Target yaml: ', targetYaml);
-    const xmlString = fs.readFileSync(xmlFile, "utf-8");
-    const parser = new xml2js.Parser();
+    const parser = new xml2js.Parser({});
     const parser2 = new xml2js.Parser({
         explicitChildren: true,
         preserveChildrenOrder: true,
@@ -382,30 +455,32 @@ function convert(xmlFile: string, targetYaml: string) {
         const beans = parseBeans(result);
         let beansYaml = beansToYAML(beans);
         beansYaml = "- " + yaml.dump(beansYaml);
-        if (beans.length)
-            fs.writeFileSync(targetYaml, beansYaml, "utf8");
-        else {
-            fs.writeFileSync(targetYaml, "", "utf8");
+        if (beans.length) {
+            beansYaml = sanitizeForYAML(beansYaml);
+            fs.writeFileSync(output, beansYaml, "utf8");
+        } else {
+            fs.writeFileSync(output, "", "utf8");
         }
 
-        const refs = parseReference(result)
+        const refs = parseReference(result);
         const Reference = yaml.dump(refs);
-        if (refs.length)
-            fs.appendFileSync(targetYaml, Reference, "utf8");
+        if (refs.length) fs.appendFileSync(output, Reference, "utf8");
 
         const restsconfig = parseRestConfiguration(result);
-        const restsconfigYaml = yaml.dump(restsconfig);
+        let restsconfigYaml = yaml.dump(restsconfig);
 
-        if (restsconfig.length)
-            fs.appendFileSync(targetYaml, restsconfigYaml, "utf8");
-
+        if (restsconfig.length) {
+            restsconfigYaml = sanitizeForYAML(restsconfigYaml);
+            fs.appendFileSync(output, restsconfigYaml, "utf8");
+        }
 
         const rests = parseRests(result);
         let restsYaml = restsToYAML(rests);
         restsYaml = yaml.dump(restsYaml);
-        if (rests.length)
-            fs.appendFileSync(targetYaml, restsYaml, "utf8");
-
+        if (rests.length) {
+            restsYaml = sanitizeForYAML(restsYaml);
+            fs.appendFileSync(output, restsYaml, "utf8");
+        }
     });
     parser2.parseString(xmlString, (err, result) => {
         if (err) {
@@ -413,15 +488,18 @@ function convert(xmlFile: string, targetYaml: string) {
             return;
         }
 
+        fs.writeFileSync("./camel.json", JSON.stringify(result, null, 2), "utf8");
+
         const routes = parseRoutes(result);
         let routesYaml = routesToYAML(routes);
         routesYaml = yaml.dump(routesYaml);
-        if (routes.length) //so we wont have empty lists [] if we ever didnt have routes ,same for beans ..refs .. etc
-            fs.appendFileSync(targetYaml, routesYaml, "utf8");
+        if (routes.length)
+            //so we wont have empty lists [] if we ever didnt have routes ,same for beans ..refs .. etc
+            routesYaml = sanitizeForYAML(routesYaml);
+        fs.appendFileSync(output, routesYaml, "utf8");
     });
-    console.log("done");
+    // return console.log("done");
 }
 
-
-// convert("test_psp.xml");
-export default convert as xmlToYamlConverter;
+// convert("ops.xml");
+export default convert;
