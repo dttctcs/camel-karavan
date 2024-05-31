@@ -20,7 +20,6 @@ import * as utils from "./utils";
 import { CamelDefinitionYaml } from "core/api/CamelDefinitionYaml";
 import { Integration, KameletTypes, Metadata, MetadataLabels } from "core/model/IntegrationDefinition";
 import { getWebviewContent } from "./webviewContent";
-import { RegistryBeanDefinition } from "core/model/CamelDefinition";
 import YAML from 'yaml';
 import { writeFileSync } from "fs";
 

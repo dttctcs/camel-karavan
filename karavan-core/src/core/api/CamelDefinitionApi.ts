@@ -1304,12 +1304,12 @@ export class CamelDefinitionApi {
         return def;
     }
 
-    static createRouteTemplateBeanDefinition = (element: any): RouteTemplateBeanDefinition => {
-        const def = element ? new RouteTemplateBeanDefinition({ ...element }) : new RouteTemplateBeanDefinition();
-        def.uuid = element?.uuid ? element.uuid : def.uuid;
-        def.property = element && element?.property ? element?.property.map((x: any) => CamelDefinitionApi.createPropertyDefinition(x)) : [];
-        return def;
-    }
+    // static createRouteTemplateBeanDefinition = (element: any): RouteTemplateBeanDefinition => {
+    //     const def = element ? new RouteTemplateBeanDefinition({ ...element }) : new RouteTemplateBeanDefinition();
+    //     def.uuid = element?.uuid ? element.uuid : def.uuid;
+    //     def.property = element && element?.property ? element?.property.map((x: any) => CamelDefinitionApi.createPropertyDefinition(x)) : [];
+    //     return def;
+    // }
 
     static createRouteTemplateDefinition = (element: any): RouteTemplateDefinition => {
         const def = element ? new RouteTemplateDefinition({ ...element }) : new RouteTemplateDefinition();
@@ -2608,12 +2608,6 @@ export class CamelDefinitionApi {
         const def = element ? new OAuth2Definition({ ...element }) : new OAuth2Definition();
         def.uuid = element?.uuid ? element.uuid : def.uuid;
         def.scopes = element && element?.scopes ? element?.scopes.map((x: any) => CamelDefinitionApi.createRestPropertyDefinition(x)) : [];
-        return def;
-    }
-
-    static createOpenApiDefinition = (element: any): OpenApiDefinition => {
-        const def = element ? new OpenApiDefinition({ ...element }) : new OpenApiDefinition();
-        def.uuid = element?.uuid ? element.uuid : def.uuid;
         return def;
     }
 

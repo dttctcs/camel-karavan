@@ -248,6 +248,8 @@ import {
    EndpointValidatorDefinition,
    PredicateValidatorDefinition,
    ValidatorsDefinition,
+   ReferenceConfigurationDefinition,
+   StreamCachingDefinition,
 } from '../model/CamelDefinition';
 import { CamelUtil } from './CamelUtil';
 import { CamelMetadataApi } from '../model/CamelMetadata';
