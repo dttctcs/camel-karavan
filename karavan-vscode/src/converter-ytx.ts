@@ -240,9 +240,6 @@ function convertYAMLToXML(yamlData) {
     return builder.buildObject(xmlData);
 }
 
-
-
-
 function cleanIds(data) {
     const idRegex = /-\b[0-9a-f]{4}\b$/;
     if (Array.isArray(data)) {
@@ -258,15 +255,26 @@ function cleanIds(data) {
     }
 }
 
-function adjustUriAndRemoveParameters(data) {
+function adjustUriAndRemoveParameters(data: any) {
     if (Array.isArray(data)) {
         data.forEach(item => adjustUriAndRemoveParameters(item));
     } else if (typeof data === 'object' && data !== null) {
         Object.keys(data).forEach(key => {
             if (data[key] && typeof data[key] === 'object' && data[key].uri && data[key].parameters) {
+                let parameterParts = [];
                 Object.keys(data[key].parameters).forEach(param => {
-                    data[key].uri += `:${(data[key].parameters[param])}`;
+                    if (param === 'name' || param === 'bucketName' || param === 'timerName' || param === 'dataSourceName') {
+                        parameterParts.push(data[key].parameters[param]);
+                    } else {
+                        parameterParts.push(`${param}=${data[key].parameters[param]}`);
+                    }
                 });
+                let base = data[key].uri;
+                let primaryParam = parameterParts.shift();
+                data[key].uri = `${base}:${primaryParam}`;
+                if (parameterParts.length > 0) {
+                    data[key].uri += `?${parameterParts.join('&amp;')}`;
+                }
                 delete data[key].parameters;
             }
             if (typeof data[key] === 'object') {

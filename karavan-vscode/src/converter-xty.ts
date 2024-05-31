@@ -500,16 +500,35 @@ function convert(file: string, output: string) {
     // return console.log("done");
 }
 
-function processNode(node) {
+function processNode(node: any) {
     if (Array.isArray(node)) {
         node.forEach(processNode);
     } else if (typeof node === 'object' && node !== null) {
         Object.keys(node).forEach(key => {
             if (key === 'uri') {
-                let uriParts = node[key].split(':');
-                if (uriParts.length > 1 && uriParts[0] !== 'direct' && uriParts[0] !== 'minio') {
-                    node['uri'] = uriParts[0];
-                    node['parameters'] = { name: uriParts[1] }; // Assume uri has exactly two parts
+                let [scheme, queryString] = node[key].split('?');
+                if (scheme && queryString) {
+                    let [base, ...rest] = scheme.split(':');
+                    node['uri'] = base;
+
+                    // Determine the correct parameter key
+                    let parameterKey = 'name';
+                    if (base === 'minio') {
+                        parameterKey = 'bucketName';
+                    } else if (base === 'timer') {
+                        parameterKey = 'timerName';
+                    } else if (base == 'jdbc')
+                        parameterKey = "dataSourceName";
+
+                    node['parameters'] = { [parameterKey]: rest.join(':') };
+
+                    let queryParts = queryString.split('&');
+                    queryParts.forEach(param => {
+                        let [paramKey, paramValue] = param.split('=');
+                        if (paramKey && paramValue) {
+                            node['parameters'][paramKey] = paramValue;
+                        }
+                    });
                 }
             } else if (typeof node[key] === 'object') {
                 processNode(node[key]);
