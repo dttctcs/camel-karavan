@@ -40,9 +40,9 @@ import {TemplateApi} from "karavan-core/lib/api/TemplateApi";
 import {Notification} from "./designer/utils/Notification";
 import {EventBus} from "./designer/utils/EventBus";
 import {TopologyTab} from "./topology/TopologyTab";
-import {KnowledgebaseHome} from "./KnowledgebaseHome";
 import {useEffect, useState} from "react";
 import {IntegrationFile} from "karavan-core/lib/model/IntegrationDefinition";
+import {KnowledgebaseHome} from "./KnowledgebaseHome";
 
 class MenuItem {
     pageId: string = '';
@@ -111,8 +111,10 @@ export function App() {
                 ComponentApi.setSupportedOnly(true);
             }
            
-        }).catch(err =>
-            EventBus.sendAlert("Error", err.text, 'danger')
+        }).catch(err => {
+                console.log(err);
+                EventBus.sendAlert("Error", err.text, 'danger')
+            }
         );
     });
 

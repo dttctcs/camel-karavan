@@ -24,6 +24,7 @@ import { RegistryBeanDefinition } from "core/model/CamelDefinition";
 import YAML from 'yaml';
 import { writeFileSync } from "fs";
 
+import { BeanFactoryDefinition } from "core/model/CamelDefinition";
 
 const KARAVAN_LOADED = "karavan:loaded";
 const KARAVAN_PANELS: Map<string, WebviewPanel> = new Map<string, WebviewPanel>();
@@ -260,7 +261,7 @@ export class DesignerView {
     }
 
     sendIntegrationData(panel: WebviewPanel, filename: string, relativePath: string,
-        fullPath: string, reread: boolean, yaml?: string, tab?: string, propertyPlaceholders?: string[], beans?: RegistryBeanDefinition[]) {
+        fullPath: string, reread: boolean, yaml?: string, tab?: string, propertyPlaceholders?: string[], beans?: BeanFactoryDefinition[]) {
         // Read and send Integrations
         utils.readCamelYamlFiles(path.dirname(fullPath)).then((files) => {
             panel.webview.postMessage({ command: 'files', files: files });

@@ -57,7 +57,7 @@ interface Props {
     showCodeTab: boolean
     tab?: "routes" | "rest" | "beans" | "kamelet"
     propertyPlaceholders: string[]
-    beans: RegistryBeanDefinition[]
+    beans: BeanFactoryDefinition[]
     files: IntegrationFile[]
 }
 

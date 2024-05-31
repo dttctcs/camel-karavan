@@ -4,7 +4,7 @@
   "displayName": "Karavan",
   "icon": "icons/karavan.png",
   "description": "Integration Toolkit for Apache Camel",
-  "version": "4.5.1",
+  "version": "4.6.0",
   "license": "Apache-2.0",
   "preview": false,
   "bugs": {
@@ -25,7 +25,7 @@
     "url": "https://github.com/apache/camel-karavan/tree/main/karavan-vscode"
   },
   "engines": {
-    "vscode": "^1.56.0"
+    "vscode": "^1.89.0"
   },
   "categories": [
     "Other"
@@ -63,7 +63,7 @@
       "properties": {
         "camel.version": {
           "type": "string",
-          "default": "4.5.0",
+          "default": "4.6.0",
           "description": "Camel version",
           "scope": "machine",
           "order": 10
@@ -260,7 +260,7 @@
             "camel.karavan.project-description=$NAME",
             "camel.karavan.target=$TARGET",
             "camel.jbang.gav=$GAV",
-            "camel.jbang.camelSpringBootVersion=4.5.0",
+            "camel.jbang.camelSpringBootVersion=4.6.0",
             "camel.jbang.springBootVersion=3.2.2",
             "camel.jbang.runtime=$RUNTIME",
             "camel.jbang.exportDir=.export",
@@ -284,7 +284,7 @@
             "camel.karavan.project-description=$NAME",
             "camel.karavan.target=$TARGET",
             "camel.jbang.gav=$GAV",
-            "camel.jbang.version=4.5.0",
+            "camel.jbang.version=4.6.0",
             "camel.jbang.runtime=camel-main",
             "camel.jbang.dependencies=camel-console,camel-platform-http-main",
             "camel.jbang.exportDir=.export",
@@ -761,19 +761,18 @@
   },
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",
-    "@patternfly/patternfly": "^5.2.0",
-    "@patternfly/react-core": "^5.2.0",
-    "@patternfly/react-table": "^5.2.0",
+    "@patternfly/patternfly": "^5.3.1",
+    "@patternfly/react-core": "^5.3.3",
+    "@patternfly/react-table": "^5.3.3",
     "@patternfly/react-topology": "^5.2.0",
     "@types/js-yaml": "4.0.9",
-    "@types/node": "20.11.16",
     "@types/uuid": "9.0.8",
     "@types/xml2js": "^0.4.14",
     "html-to-image": "1.11.11",
     "js-yaml": "^4.1.0",
     "path-browserify": "^1.0.1",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "rxjs": "7.8.1",
     "shelljs": "^0.8.5",
     "uuid": "9.0.1",
@@ -781,19 +780,19 @@
     "xml-reader": "^2.4.3",
     "xml2js": "^0.6.2",
     "yaml": "^2.4.1",
-    "zustand": "4.5.0"
+    "zustand": "4.5.2"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@svgr/webpack": "7.0.0",
+    "@types/node": "20.12.10",
     "@types/chai": "^4.3.0",
     "@types/glob": "^7.1.3",
     "@types/mocha": "^8.0.4",
-    "@types/node": "^18.11.18",
-    "@types/react": "^18.2.33",
-    "@types/react-dom": "18.2.1",
-    "@types/shelljs": "^0.8.10",
-    "@types/vscode": "^1.56.0",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "18.3.0",
+    "@types/shelljs": "^0.8.15",
+    "@types/vscode": "1.89.0",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
     "@vscode/test-electron": "2.3.4",
