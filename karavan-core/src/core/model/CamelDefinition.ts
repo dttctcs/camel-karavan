@@ -3528,12 +3528,25 @@ export class RestConfigurationDefinition extends CamelElement {
 }
 
 export class ReferenceConfigurationDefinition extends CamelElement {
-    stepName?:string = 'reference'
+    stepName?: string = 'reference'
     id?: string;
     interface?: string;
     filter?: string;
     public constructor(init?: Partial<ReferenceConfigurationDefinition>) {
         super('ReferenceConfigurationDefinition');
+        Object.assign(this, init);
+    }
+}
+
+export class StreamCachingDefinition extends CamelElement {
+    stepName?: string = 'streamCaching';
+    id?: string;
+    bufferSize?: number;
+    spoolEnabled?: boolean;
+    spoolDirectory?: string;
+    spoolThreshold?: number;
+    public constructor(init?: Partial<StreamCachingDefinition>) {
+        super('StreamCachingDefinition');
         Object.assign(this, init);
     }
 }

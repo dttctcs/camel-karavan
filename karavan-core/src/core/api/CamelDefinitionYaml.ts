@@ -16,7 +16,7 @@
  */
 import * as yaml from 'js-yaml';
 import { Beans, CamelElement, Integration } from '../model/IntegrationDefinition';
-import { ReferenceConfigurationDefinition, RegistryBeanDefinition, RouteConfigurationDefinition, RouteDefinition } from '../model/CamelDefinition';
+import { ReferenceConfigurationDefinition, RegistryBeanDefinition, RouteConfigurationDefinition, RouteDefinition, StreamCachingDefinition } from '../model/CamelDefinition';
 import { CamelUtil } from './CamelUtil';
 import { CamelDefinitionYamlStep } from './CamelDefinitionYamlStep';
 
@@ -320,7 +320,8 @@ export class CamelDefinitionYaml {
             .forEach((f: any) => result.push(CamelDefinitionYamlStep.readRouteConfigurationDefinition(new RouteConfigurationDefinition({ onCompletion: f.onCompletion }))));
         flows.filter((e: any) => e.hasOwnProperty('reference'))
             .forEach((f: any) => result.push(CamelDefinitionYamlStep.readReferenceConfigurationDefinition(new ReferenceConfigurationDefinition(f.reference))));
-
+        flows.filter((e: any) => e.hasOwnProperty('streamCaching'))
+            .forEach((f: any) => result.push(CamelDefinitionYamlStep.readStreamCachingDefinition(new StreamCachingDefinition(f.streamCaching))))
         return result;
     };
 
