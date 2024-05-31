@@ -507,8 +507,9 @@ function processNode(node: any) {
         Object.keys(node).forEach(key => {
             if (key === 'uri') {
                 let [scheme, queryString] = node[key].split('?');
-                if (scheme && queryString) {
-                    let [base, ...rest] = scheme.split(':');
+                let base, rest;
+                if (scheme) {
+                    [base, ...rest] = scheme.split(':');
                     node['uri'] = base;
 
                     // Determine the correct parameter key
@@ -517,18 +518,21 @@ function processNode(node: any) {
                         parameterKey = 'bucketName';
                     } else if (base === 'timer') {
                         parameterKey = 'timerName';
-                    } else if (base == 'jdbc')
-                        parameterKey = "dataSourceName";
+                    } else if (base === 'jdbc') {
+                        parameterKey = 'dataSourceName';
+                    }
 
                     node['parameters'] = { [parameterKey]: rest.join(':') };
 
-                    let queryParts = queryString.split('&');
-                    queryParts.forEach(param => {
-                        let [paramKey, paramValue] = param.split('=');
-                        if (paramKey && paramValue) {
-                            node['parameters'][paramKey] = paramValue;
-                        }
-                    });
+                    if (queryString) {
+                        let queryParts = queryString.split('&amp;');
+                        queryParts.forEach(param => {
+                            let [paramKey, paramValue] = param.split('=');
+                            if (paramKey && paramValue) {
+                                node['parameters'][paramKey] = paramValue;
+                            }
+                        });
+                    }
                 }
             } else if (typeof node[key] === 'object') {
                 processNode(node[key]);

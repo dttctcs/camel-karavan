@@ -262,13 +262,17 @@ function adjustUriAndRemoveParameters(data: any) {
         Object.keys(data).forEach(key => {
             if (data[key] && typeof data[key] === 'object' && data[key].uri && data[key].parameters) {
                 let parameterParts = [];
+                let primaryParamKey;
+
                 Object.keys(data[key].parameters).forEach(param => {
                     if (param === 'name' || param === 'bucketName' || param === 'timerName' || param === 'dataSourceName') {
-                        parameterParts.push(data[key].parameters[param]);
+                        primaryParamKey = param;
+                        parameterParts.unshift(data[key].parameters[param]);
                     } else {
                         parameterParts.push(`${param}=${data[key].parameters[param]}`);
                     }
                 });
+
                 let base = data[key].uri;
                 let primaryParam = parameterParts.shift();
                 data[key].uri = `${base}:${primaryParam}`;
