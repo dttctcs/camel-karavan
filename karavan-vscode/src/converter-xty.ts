@@ -500,7 +500,7 @@ function convert(file: string, output: string) {
     // return console.log("done");
 }
 
-function processNode(node: any) {
+function processNode(node) {
     if (Array.isArray(node)) {
         node.forEach(processNode);
     } else if (typeof node === 'object' && node !== null) {
@@ -525,7 +525,7 @@ function processNode(node: any) {
                     node['parameters'] = { [parameterKey]: rest.join(':') };
 
                     if (queryString) {
-                        let queryParts = queryString.split('&amp;');
+                        let queryParts = queryString.split('&');
                         queryParts.forEach(param => {
                             let [paramKey, paramValue] = param.split('=');
                             if (paramKey && paramValue) {

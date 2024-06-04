@@ -255,7 +255,7 @@ function cleanIds(data) {
     }
 }
 
-function adjustUriAndRemoveParameters(data: any) {
+function adjustUriAndRemoveParameters(data) {
     if (Array.isArray(data)) {
         data.forEach(item => adjustUriAndRemoveParameters(item));
     } else if (typeof data === 'object' && data !== null) {
